@@ -2182,7 +2182,7 @@ const db = window.supabase ? window.supabase.createClient(supabaseUrl, supabaseK
 // Variables Globales
 let USERS={'michelle':{name:'Michelle',type:'admin',icon:'fa-shield-alt',color:'bg-indigo-600',comision:20},'jesus':{name:'Jesús',type:'user',icon:'fa-user',color:'bg-[#0284c7]',comision:20},'tito':{name:'Tito',type:'user',icon:'fa-user-tie',color:'bg-[#16a34a]',comision:20},'gussepy':{name:'Gussepy',type:'master',icon:'fa-crown',color:'bg-amber-600',comision:20},'emilia':{name:'M. Emilia',type:'bonos',icon:'fa-gift',color:'bg-rose-600',comision:20},'melanie':{name:'Melanie',type:'cajero_afiliados',icon:'fa-calculator',color:'bg-pink-500',comision:20},'admin':{name:'Afiliado VIP',type:'influencer',icon:'fa-bullhorn',color:'bg-purple-600',comision:20},'1311397689':{name:'Supervisor',type:'superadmin',icon:'fa-user-secret',color:'bg-slate-800',comision:20}};
 let currentUser=null,isSuperAdmin=false;
-let records=[],advances=[],bonos=[],giros=[],referrals=[],rendimientos=[],allReceipts=[];
+let records=[],advances=[],bonos=[],giros=[],referrals=[],rendimientos=[],bonosRealesList=[],allReceipts=[];
 let externalCommissions = [], messages = [];
 let globalSettings = { jesus_ambos_marcan_pct: 10, jesus_sepybet_pct: 5, jesus_chichesepy_pct: 5, tito_sepybet_pct: 5, tito_chichesepy_pct: 5 };
 
@@ -2198,7 +2198,7 @@ let currentPlayersList=[],uploadData=[],bankUploadData=[],bonosRealesUploadData=
 let contactsMap = {}; let campaignsList = []; let campaignTargetsList = []; let currentCampaignId = null;
 
 const PAGE_SIZE=15;
-let pages={dash:1,audit:1,gussepy:1,bonos:1,giros:1,ref:1,mel:1,inactivos:1,infdash:1,infdetail:1,bonosReal:1,contacts:1};
+let pages={dash:1,audit:1,gussepy:1,bonos:1,giros:1,ref:1,mel:1,inactivos:1,infdash:1,infdetail:1,breales:1,contacts:1};
 
 function resetPagesAndUpdate(){Object.keys(pages).forEach(k=>pages[k]=1);updateAllViews();}
 function changePage(type,delta){pages[type]+=delta;updateAllViews();}
@@ -2522,7 +2522,8 @@ async function fetchData(isBackground=false){
             db.from('bonos').select('*').order('id', { ascending: false }).limit(5000),
             db.from('giros').select('*').order('id', { ascending: false }).limit(3000),
             db.from('referrals').select('*').order('id', { ascending: false }).limit(3000),
-            db.from('rendimientos').select('*').order('id', { ascending: false }).limit(5000)
+            db.from('rendimientos').select('*').order('id', { ascending: false }).limit(5000),
+            db.from('bonos_reales').select('*').order('id', { ascending: false }).limit(3000)
         ]);
         
         const resUsers = pBase[0].status === 'fulfilled' ? pBase[0].value : null;
@@ -2539,6 +2540,7 @@ async function fetchData(isBackground=false){
         giros = safeData(pBase[4]).map(r => ({...r, amountWon: r.amount_won, createdBy: r.created_by}));
         referrals = safeData(pBase[5]).map(r => ({...r, createdBy: r.created_by, isInfluencer: r.is_influencer}));
         rendimientos = safeData(pBase[6]).map(r => ({...r, createdBy: r.created_by}));
+        bonosRealesList = safeData(pBase[7]);
 
         allReceipts = records.map(r => r.receipt).filter(r => r && r !== 'Sin Ref');
         records.sort(sortDataDesc); advances.sort(sortDataDesc); bonos.sort(sortDataDesc); giros.sort(sortDataDesc); referrals.sort(sortDataDesc); rendimientos.sort(sortDataDesc);
@@ -3111,14 +3113,13 @@ function handleBonosRealesUpload(e) {
                 if(comentarioLower.includes('bono') || comentarioLower.includes('bonus')) {
                     let rawMonto = getVal(row[cIdx.monto]);
                     if(rawMonto !== 0) {
-                        let dateBase = excelToISO(row[cIdx.f]);
-                        let timePart = getLocalIsoDatetime().split('T')[1]; 
-                        bonosRealesUploadData.push({
-                            date: `${dateBase}T${timePart}`,
-                            jugador: String(row[cIdx.jug]||'Desconocido').trim(),
-                            monto: Math.abs(rawMonto),
-                            comentario: comentarioOriginal
-                        });
+                      let dateBase = excelToISO(row[cIdx.f]);
+                    bonosRealesUploadData.push({
+                        date: dateBase,
+                        jugador: String(row[cIdx.jug]||'Desconocido').trim(),
+                        monto: Math.abs(rawMonto),
+                        comentario: comentarioOriginal
+                    });
                     }
                 }
             }
@@ -3144,12 +3145,17 @@ async function submitBonosRealesData() {
     btn.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i> Subiendo...`;
     
     let upsertData = bonosRealesUploadData.map((r, i) => ({
-        id: 'TX_BN_REAL_' + Date.now() + '_' + i, date: r.date, amount: r.monto, assigned_to: 'tito', 
-        concept: 'Bono Saldo Real - ' + r.comentario, created_by: cleanStr(currentUser), status: 'Verificado', receipt: r.jugador, is_sueldo: false
+        id: 'BN_REAL_' + Date.now() + '_' + i, 
+        date: r.date, 
+        amount: r.monto, 
+        concept: r.comentario, 
+        jugador: r.jugador,
+        created_by: cleanStr(currentUser), 
+        status: 'Verificado'
     }));
     
     try {
-        const { error } = await db.from('records').insert(upsertData);
+        const { error } = await db.from('bonos_reales').insert(upsertData);
         if(!error) { showToast("Bonos Reales procesados correctamente.", "success"); await fetchData(true); } 
         else { showToast("Error subiendo datos.", "error"); }
     } catch(e) { showToast("Error de red.", "error"); }
@@ -3214,8 +3220,7 @@ function handleBonosApuestasUpload(e) {
                         rawGanancia = getVal(row[cIdx.gananciaPosible]);
                     }
 
-                    let dateBase = excelToISO(row[cIdx.fecha]);
-                    let timePart = getLocalIsoDatetime().split('T')[1]; 
+                   let dateBase = excelToISO(row[cIdx.fecha]);
                     
                     let idApuesta = String(row[cIdx.id]||Date.now()+'_'+i).trim();
 
@@ -3224,7 +3229,7 @@ function handleBonosApuestasUpload(e) {
                             id_apuesta: idApuesta,
                             jugador: String(row[cIdx.jug]||'Desconocido').trim(),
                             monto: rawMonto, ganancia: rawGanancia, estado: stDisplay,
-                            fecha: `${dateBase}T${timePart}`, agente: String(row[cIdx.agente]||'Sepybet').trim(),
+                            fecha: dateBase, agente: String(row[cIdx.agente]||'Sepybet').trim(),
                             selecciones: 1 
                         });
                         addedCount++;
@@ -4068,8 +4073,8 @@ function updateAllViews(){
         renderContactsTable();
     }
 
-    const bonosReales = records.filter(r => r.concept && String(r.concept).toLowerCase().includes('bono'));
-    const recordsOperativos = records.filter(r => !(r.concept && String(r.concept).toLowerCase().includes('bono')));
+    const bonosReales = [...bonosRealesList];
+    const recordsOperativos = [...records];
 
     if(userType==='admin'||userType==='master'||isSuperAdmin||userType==='user'){
         const fRecords=recordsOperativos.filter(r=>isSameMonth(r.date,globalMF));
@@ -4422,20 +4427,20 @@ function updateAllViews(){
         }
         
         // --- BONOS SALDO REAL ---
-        let fBonosReal = records.filter(r => r.concept && String(r.concept).toLowerCase().includes('bono'));
+        let fBonosReal = [...bonosRealesList];
         if(bonoRealFilters.dateFrom || bonoRealFilters.dateTo) fBonosReal = fBonosReal.filter(r => isWithinDateRange(r.date, bonoRealFilters.dateFrom, bonoRealFilters.dateTo));
-        if(bonoRealFilters.jugador) fBonosReal = fBonosReal.filter(r => String(r.receipt).toLowerCase().includes(bonoRealFilters.jugador) || String(r.comment).toLowerCase().includes(bonoRealFilters.jugador) || String(r.concept).toLowerCase().includes(bonoRealFilters.jugador));
+        if(bonoRealFilters.jugador) fBonosReal = fBonosReal.filter(r => String(r.jugador).toLowerCase().includes(bonoRealFilters.jugador) || String(r.concept).toLowerCase().includes(bonoRealFilters.jugador));
         
         const elTotalBonoReal = document.getElementById('bonoreal-total-sum');
         if(elTotalBonoReal) elTotalBonoReal.innerText = fmt(fBonosReal.reduce((sum, r) => sum + Math.abs(r.amount), 0));
 
         const elTableBonosReal = document.getElementById('table-bonos-real-list');
         if(elTableBonosReal) {
-            let hBR = ''; const pagBR = paginate(fBonosReal, 'bonosReal');
+            let hBR = ''; const pagBR = paginate(fBonosReal, 'breales'); 
             for(let i=0; i<pagBR.length; i++){
                 const r = pagBR[i];
                 let badge = r.status==='Verificado' ? `<span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded text-[10px] font-black uppercase"><i class="fas fa-check"></i> Verif</span>` : `<span class="bg-amber-100 text-amber-700 px-2 py-1 rounded text-[10px] font-black uppercase">Pendiente</span>`;
-                hBR += `<tr class="border-b border-slate-50 hover:bg-slate-50/50 transition-colors"><td data-label="Fecha" class="p-3 text-xs font-bold pl-2">${fmtDate(r.date)}</td><td data-label="Jugador" class="p-3 text-xs font-bold uppercase text-indigo-600">${r.receipt || '-'}</td><td data-label="Monto" class="p-3 text-sm font-black text-emerald-600">${fmt(Math.abs(r.amount))}</td><td data-label="Concepto" class="p-3 text-[10px] italic text-slate-500">${r.comment || r.concept}</td><td data-label="Responsable" class="p-3 text-xs font-bold text-slate-600">${USERS[cleanStr(r.createdBy)]?.name || r.createdBy}</td><td data-label="Estado" class="p-3 text-center pr-2">${badge}</td></tr>`;
+                hBR += `<tr class="border-b border-slate-50 hover:bg-slate-50/50 transition-colors"><td data-label="Fecha" class="p-3 text-xs font-bold pl-2">${fmtDate(r.date)}</td><td data-label="Jugador" class="p-3 text-xs font-bold uppercase text-indigo-600">${r.jugador || '-'}</td><td data-label="Monto" class="p-3 text-sm font-black text-emerald-600">${fmt(Math.abs(r.amount))}</td><td data-label="Concepto" class="p-3 text-[10px] italic text-slate-500">${r.concept || '-'}</td><td data-label="Responsable" class="p-3 text-xs font-bold text-slate-600">${USERS[cleanStr(r.created_by)]?.name || r.created_by}</td><td data-label="Estado" class="p-3 text-center pr-2">${badge}</td></tr>`;
             }
             elTableBonosReal.innerHTML = hBR || `<tr><td colspan="6" class="p-4 text-center text-sm text-slate-400">No hay bonos de saldo real registrados.</td></tr>`;
         }
