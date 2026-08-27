@@ -2900,7 +2900,8 @@ function renderCampaignDetails() {
     if(!tbody) return;
     let html = '';
     displayTargets.forEach(t => {
-        let phone = contactsMap[t.username] ? contactsMap[t.username].phone : '-';
+        // Lee el teléfono directamente de la campaña (t.phone)
+        let phone = t.phone || (contactsMap[t.username] ? contactsMap[t.username].phone : '-');
         let badge = t.deposited ? `<span class="px-3 py-1.5 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-xl text-[10px] font-black uppercase"><i class="fas fa-check mr-1"></i> Sí depositó</span>` : `<span class="px-3 py-1.5 bg-slate-50 text-slate-400 border border-slate-200 rounded-xl text-[10px] font-black uppercase"><i class="fas fa-times mr-1"></i> No</span>`;
         let amtClass = t.deposited ? 'text-emerald-600' : 'text-slate-300';
         html += `<tr class="border-b border-slate-50 hover:bg-slate-50/50 transition-colors"><td data-label="Usuario" class="p-4 pl-8 font-black uppercase text-purple-600">${t.username}</td><td data-label="Teléfono" class="p-4 font-mono text-sm font-bold text-slate-600">${phone}</td><td data-label="Depositó" class="p-4 text-center">${badge}</td><td data-label="Monto" class="p-4 pr-8 text-right font-black ${amtClass}">${fmt(t.amount_deposited)}</td></tr>`;
@@ -2909,10 +2910,10 @@ function renderCampaignDetails() {
 }
 
 // CORRECCIÓN: Fuzzy Matching al 75%
-function analyzeCampaignFile() {
+async function analyzeCampaignFile() {
     if(!currentCampaignId) return;
     const fileInput = document.getElementById('upload-camp-analysis-file');
-    if(!fileInput.files.length) return showToast("Seleccione el reporte de Transacciones del Backoffice", "warning");
+    if(!fileInput.files.length) return showToast("Seleccione el reporte de Transacciones", "warning");
 
     const btn = fileInput.nextElementSibling;
     const origHtml = btn.innerHTML;
@@ -2953,10 +2954,11 @@ function analyzeCampaignFile() {
                     
                     let amt = getVal(row[cM]);
                     if(isDeposit && amt > 0) {
-                        let normU = normalizeUsername(row[cU]);
-                        if(normU) {
-                            if(!depositsMap[normU]) depositsMap[normU] = 0;
-                            depositsMap[normU] += amt;
+                        let rawU = String(row[cU]).toLowerCase().trim();
+                        let cleanU = rawU.replace(/[^a-z0-9]/g, '');
+                        if(cleanU) {
+                            if(!depositsMap[cleanU]) depositsMap[cleanU] = 0;
+                            depositsMap[cleanU] += amt;
                         }
                     }
                 }
@@ -2964,22 +2966,24 @@ function analyzeCampaignFile() {
 
             const targetsToUpdate = [];
             campaignTargetsList.filter(t => t.campaign_id === currentCampaignId).forEach(t => {
-                let targetUser = t.username;
+                let targetUser = t.username; 
+                
+                const superClean = (str) => {
+                    let s = str.replace(/cliente/gi, '').replace(/sorti365/gi, '').replace(/sorti/gi, '').replace(/sepybet/gi, '').replace(/oficial/gi, '');
+                    return s.replace(/[^a-z0-9]/g, '').trim();
+                };
+
+                let cleanTarget = superClean(targetUser);
                 let matched = false;
                 let matchAmt = 0;
                 
-                // 1. Búsqueda exacta
-                if(depositsMap[targetUser]) {
-                    matched = true;
-                    matchAmt = depositsMap[targetUser];
-                } else {
-                    // 2. Fuzzy Match (>= 75%)
-                    for(let backUser in depositsMap) {
-                        if(getSimilarity(targetUser, backUser) >= 0.75) {
-                            matched = true;
-                            matchAmt = depositsMap[backUser];
-                            break;
-                        }
+                for(let backUser in depositsMap) {
+                    let cleanBack = superClean(backUser);
+                    
+                    if(cleanTarget === cleanBack && cleanTarget.length > 0) {
+                        matched = true;
+                        matchAmt = depositsMap[backUser];
+                        break;
                     }
                 }
                 
@@ -3001,11 +3005,11 @@ function analyzeCampaignFile() {
                     const chunk = targetsToUpdate.slice(i, i + chunkSize);
                     await db.from('campaign_targets').upsert(chunk);
                 }
-                showToast("Análisis completado, métricas actualizadas", "success");
+                showToast("Análisis completado sin errores", "success");
                 fileInput.value = '';
                 await fetchData(true); 
             } else {
-                showToast("Ningún usuario de la campaña registró depósitos", "warning");
+                showToast("Ningún usuario coincide exactamente al 100%", "warning");
             }
 
         } catch(err) { showToast("Error analizando Backoffice", "error"); console.log(err); }
@@ -3039,8 +3043,9 @@ async function confirmCampDownload() {
     let exportData = [];
     finalUsers.forEach(t => {
         let u = t.username;
-        let phoneVal = contactsMap[u] ? contactsMap[u].phone : 'Sin Teléfono';
-        let origName = contactsMap[u] ? contactsMap[u].orig : u;
+        // Lee directamente los datos que guardamos
+        let phoneVal = t.phone || (contactsMap[u] ? contactsMap[u].phone : 'Sin Teléfono');
+        let origName = t.original_name || (contactsMap[u] ? contactsMap[u].orig : u);
         if(format === 'user_phone') exportData.push({ 'Nombre Base': origName, 'Usuario Limpio': u, 'Teléfono': phoneVal });
         else exportData.push({ 'Nombre Base': origName, 'Usuario Limpio': u });
     });
