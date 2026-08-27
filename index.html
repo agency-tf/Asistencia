@@ -2545,12 +2545,12 @@ async function fetchData(isBackground=false){
         allReceipts = records.map(r => r.receipt).filter(r => r && r !== 'Sin Ref');
         records.sort(sortDataDesc); advances.sort(sortDataDesc); bonos.sort(sortDataDesc); giros.sort(sortDataDesc); referrals.sort(sortDataDesc); rendimientos.sort(sortDataDesc);
 
-        // Bloque CRM Aislado
+       // Bloque CRM Aislado
         try {
             const pCRM = await Promise.allSettled([
-                db.from('contacts').select('*'),
-                db.from('campaigns').select('*'),
-                db.from('campaign_targets').select('*')
+                db.from('contacts').select('*').limit(15000),
+                db.from('campaigns').select('*').order('date_sent', {ascending: false}),
+                db.from('campaign_targets').select('*').order('id', {ascending: false}).limit(50000)
             ]);
             const resContacts = pCRM[0].status === 'fulfilled' ? pCRM[0].value : null;
             const resCamps = pCRM[1].status === 'fulfilled' ? pCRM[1].value : null;
@@ -2669,7 +2669,14 @@ async function processCampaign() {
     const name = document.getElementById('camp-name').value.trim();
     const cDate = document.getElementById('camp-date').value;
     const fileInput = document.getElementById('upload-camp-file');
+    
     if(!name || !cDate || !fileInput.files.length) return showToast("Falta nombre, fecha o archivo", "warning");
+    
+    const btn = document.querySelector('button[onclick="processCampaign()"]');
+    const origText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Guardando Campaña y Contactos...';
+    btn.disabled = true;
+
     const file = fileInput.files[0];
     const reader = new FileReader();
     reader.onload = async function(evt) {
@@ -2678,44 +2685,110 @@ async function processCampaign() {
             const sheet = workbook.Sheets[workbook.SheetNames[0]];
             const rows = XLSX.utils.sheet_to_json(sheet, {header:1});
             
-            let cU = -1;
-            for(let i=0; i<Math.min(15, rows.length); i++){
-                const r = Array.from(rows[i]||[]).map(x=>String(x).toLowerCase().trim());
-                cU = r.findIndex(x=>x.includes('usuario') || x.includes('nombre') || x.includes('jugador') || x.includes('agente'));
-                if(cU !== -1) break;
-            }
-            if(cU === -1) cU = 0; 
-            
             let targetUsers = new Set();
-            for(let i=1; i<rows.length; i++){
-                const row = rows[i]||[];
-                if(row[cU]) {
-                    let normU = normalizeUsername(row[cU]);
-                    if(normU) targetUsers.add(normU);
+            let newContacts = [];
+            
+            // 1. Determinar si la fila 0 es encabezado para saltarla
+            let startIndex = 0;
+            if (rows.length > 0) {
+                let row0 = rows[0].map(String).join('').toLowerCase();
+                if (row0.includes('name') || row0.includes('nombre') || row0.includes('number') || row0.includes('phone') || row0.includes('usuario')) {
+                    startIndex = 1;
                 }
             }
-            if(targetUsers.size === 0) return showToast("No se encontraron usuarios", "error");
+
+            // 2. Escáner Inteligente Fila por Fila
+            for (let i = startIndex; i < rows.length; i++) {
+                const row = rows[i] || [];
+                if (row.length < 2) continue;
+
+                let val0 = String(row[0] || '').trim();
+                let val1 = String(row[1] || '').trim();
+
+                let valName = "";
+                let valPhone = "";
+
+                // Regla: El teléfono es el que tiene puros números (al menos 7 dígitos)
+                const phoneRegex = /^[\d\+\-\s]{7,}$/;
+                
+                if (phoneRegex.test(val1) && !phoneRegex.test(val0)) {
+                    valName = val0;
+                    valPhone = val1;
+                } else if (phoneRegex.test(val0) && !phoneRegex.test(val1)) {
+                    valName = val1;
+                    valPhone = val0;
+                } else {
+                    // Por defecto asume el orden [Nombre, Teléfono]
+                    valName = val0;
+                    valPhone = val1;
+                }
+
+                if (!valName || valName.toLowerCase() === 'name' || valName.toLowerCase() === 'nombre') continue;
+
+                // 3. Limpieza y guardado temporal
+                let normU = normalizeUsername(valName);
+                if (normU) {
+                    targetUsers.add(normU);
+                    let cleanPhone = valPhone.replace(/[^\d\+]/g, '');
+                    if (cleanPhone.length >= 7) {
+                        newContacts.push({
+                            username: normU,
+                            phone: cleanPhone,
+                            original_name: valName
+                        });
+                    }
+                }
+            }
+            
+            if(targetUsers.size === 0) {
+                btn.innerHTML = origText; btn.disabled = false;
+                return showToast("No se encontraron usuarios válidos", "error");
+            }
             
             const campId = 'CAMP_' + Date.now();
             const newCamp = { id: campId, name: name, date_sent: cDate, created_by: cleanStr(currentUser) };
-            showToast(`Creando campaña (${targetUsers.size} usuarios)...`, "info");
+            showToast(`Insertando ${targetUsers.size} usuarios...`, "info");
+            
             await db.from('campaigns').insert([newCamp]);
             
-            let targetRows = Array.from(targetUsers).map(u => ({ campaign_id: campId, username: u, deposited: false, amount_deposited: 0 }));
+            let targetRows = Array.from(targetUsers).map((u, index) => ({ 
+                id: campId + '_' + index,
+                campaign_id: campId, 
+                username: u, 
+                deposited: false, 
+                amount_deposited: 0 
+            }));
+            
             const chunkSize = 1000;
+            // 4. Guardar Audiencia de Campaña
             for (let i = 0; i < targetRows.length; i += chunkSize) {
                 const chunk = targetRows.slice(i, i + chunkSize);
                 await db.from('campaign_targets').insert(chunk);
             }
-            showToast("Campaña creada. Entra a 'Ver Detalles' para analizar el ROI.", "success");
+            
+            // 5. Guardar Directorio de Contactos
+            if(newContacts.length > 0) {
+                const uniqueContacts = Array.from(new Map(newContacts.map(item => [item.username, item])).values());
+                for (let i = 0; i < uniqueContacts.length; i += chunkSize) {
+                    const chunk = uniqueContacts.slice(i, i + chunkSize);
+                    await db.from('contacts').upsert(chunk, { onConflict: 'username' });
+                }
+            }
+            
+            showToast("Campaña y teléfonos guardados con éxito.", "success");
             document.getElementById('camp-name').value = '';
             fileInput.value = '';
+            
             await fetchData(true);
-        } catch(err) { showToast("Error procesando campaña", "error"); console.log(err); }
+            
+        } catch(err) { 
+            showToast("Error procesando campaña", "error"); 
+            console.error(err); 
+        }
+        btn.innerHTML = origText; btn.disabled = false;
     };
     reader.readAsBinaryString(file);
 }
-
 function renderCampaignsTable() {
     const tbody = document.getElementById('campaigns-table-body');
     if(!tbody) return;
