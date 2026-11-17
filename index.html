@@ -35,11 +35,11 @@
                 </div>
                 <div>
                     <h1 class="text-lg sm:text-xl font-bold tracking-tight">Asistencia Abanderados - Manta</h1>
-                    <p class="text-xs text-blue-200">Registro y Actualización en Tiempo Real</p>
+                    <p class="text-xs text-blue-200">Registro y Cronograma en Tiempo Real</p>
                 </div>
             </div>
             <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
-                <button onclick="cargarDatos()" class="bg-white/15 hover:bg-white/25 text-white px-3.5 py-2.5 rounded-xl text-sm font-medium transition flex items-center gap-2" title="Sincronizar con Supabase">
+                <button onclick="cargarTodo()" class="bg-white/15 hover:bg-white/25 text-white px-3.5 py-2.5 rounded-xl text-sm font-medium transition flex items-center gap-2" title="Sincronizar con Supabase">
                     <i class="fa-solid fa-rotate-right" id="icon-refresh"></i>
                     <span class="hidden sm:inline">Sincronizar</span>
                 </button>
@@ -51,102 +51,360 @@
         </div>
     </header>
 
+    <!-- Navegación por Pestañas (Asistencia vs Cronograma de Visitas) -->
+    <div class="bg-white border-b border-slate-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex gap-2 sm:gap-4">
+            <button id="tab-asistencia" onclick="cambiarVista('asistencia')" 
+                class="py-3.5 px-4 text-sm font-bold border-b-2 border-blue-700 text-blue-700 flex items-center gap-2 transition">
+                <i class="fa-solid fa-clipboard-user"></i>
+                <span>Control de Asistencia</span>
+            </button>
+            <button id="tab-cronograma" onclick="cambiarVista('cronograma')" 
+                class="py-3.5 px-4 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2 transition">
+                <i class="fa-solid fa-calendar-days"></i>
+                <span>Cronograma de Visitas</span>
+                <span id="badge-visitas" class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-0.5 rounded-full">0</span>
+            </button>
+        </div>
+    </div>
+
     <!-- Contenido Principal -->
     <main class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8 flex-grow w-full">
 
-        <!-- Tarjetas de Estadísticas en Vivo -->
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-semibold text-slate-500 uppercase">Total Estudiantes</p>
-                    <p class="text-2xl font-extrabold text-slate-800 mt-1" id="stat-total">0</p>
+        <!-- ========================================================= -->
+        <!-- VISTA 1: CONTROL DE ASISTENCIA DE ESTUDIANTES             -->
+        <!-- ========================================================= -->
+        <div id="vista-asistencia">
+            <!-- Tarjetas de Estadísticas en Vivo -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold text-slate-500 uppercase">Total Convocados</p>
+                        <p class="text-2xl font-extrabold text-slate-800 mt-1" id="stat-total">0</p>
+                    </div>
+                    <div class="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
                 </div>
-                <div class="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg">
-                    <i class="fa-solid fa-users"></i>
+
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold text-emerald-600 uppercase">Asistentes</p>
+                        <p class="text-2xl font-extrabold text-emerald-600 mt-1" id="stat-asistentes">0</p>
+                    </div>
+                    <div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-user-check"></i>
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold text-amber-600 uppercase">Pendientes</p>
+                        <p class="text-2xl font-extrabold text-amber-600 mt-1" id="stat-pendientes">0</p>
+                    </div>
+                    <div class="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-clock"></i>
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold text-indigo-600 uppercase">Avance</p>
+                        <p class="text-2xl font-extrabold text-indigo-600 mt-1" id="stat-porcentaje">0%</p>
+                    </div>
+                    <div class="w-11 h-11 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-chart-pie"></i>
+                    </div>
                 </div>
             </div>
 
-            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-semibold text-emerald-600 uppercase">Asistentes</p>
-                    <p class="text-2xl font-extrabold text-emerald-600 mt-1" id="stat-asistentes">0</p>
-                </div>
-                <div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg">
-                    <i class="fa-solid fa-user-check"></i>
+            <!-- Barra de Búsqueda y Filtros -->
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+                    <!-- Buscador -->
+                    <div class="md:col-span-5 relative">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-slate-400"></i>
+                        <input type="text" id="input-busqueda" oninput="filtrarRegistros()" 
+                            placeholder="Buscar por apellidos, nombres o cédula..." 
+                            class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                    </div>
+
+                    <!-- Filtro Institución -->
+                    <div class="md:col-span-4">
+                        <select id="filtro-institucion" onchange="filtrarRegistros()" 
+                            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-base focus:ring-2 focus:ring-blue-500 outline-none">
+                            <option value="">Todas las Unidades Educativas</option>
+                        </select>
+                    </div>
+
+                    <!-- Filtro Estado -->
+                    <div class="md:col-span-3">
+                        <select id="filtro-estado" onchange="filtrarRegistros()" 
+                            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-base focus:ring-2 focus:ring-blue-500 outline-none">
+                            <option value="todos">Estado: Todos</option>
+                            <option value="pendientes">Pendientes de Asistencia</option>
+                            <option value="asistentes">Ya Registrados (Asistieron)</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
-            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-semibold text-amber-600 uppercase">Pendientes</p>
-                    <p class="text-2xl font-extrabold text-amber-600 mt-1" id="stat-pendientes">0</p>
-                </div>
-                <div class="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg">
-                    <i class="fa-solid fa-clock"></i>
-                </div>
+            <!-- Indicador de Carga -->
+            <div id="loader" class="text-center py-12">
+                <i class="fa-solid fa-circle-notch fa-spin text-3xl text-blue-600 mb-3"></i>
+                <p class="text-slate-500 font-medium">Conectando con Supabase...</p>
             </div>
 
-            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-semibold text-indigo-600 uppercase">Avance</p>
-                    <p class="text-2xl font-extrabold text-indigo-600 mt-1" id="stat-porcentaje">0%</p>
-                </div>
-                <div class="w-11 h-11 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg">
-                    <i class="fa-solid fa-chart-pie"></i>
-                </div>
+            <!-- Caja de Error -->
+            <div id="error-box" class="hidden bg-red-50 border border-red-200 text-red-700 p-4 rounded-2xl mb-6 text-sm"></div>
+
+            <!-- Listado de Estudiantes -->
+            <div id="contenedor-registros" class="hidden space-y-3"></div>
+
+            <!-- Mensaje Sin Resultados -->
+            <div id="sin-resultados" class="hidden text-center py-12 bg-white rounded-2xl border border-slate-200">
+                <i class="fa-solid fa-folder-open text-4xl text-slate-300 mb-3"></i>
+                <p class="text-slate-600 font-medium">No se encontraron estudiantes con los filtros aplicados.</p>
             </div>
         </div>
 
-        <!-- Barra de Búsqueda y Filtros -->
-        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 mb-6">
-            <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
-                <!-- Buscador por nombre o cédula -->
-                <div class="md:col-span-5 relative">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-slate-400"></i>
-                    <input type="text" id="input-busqueda" oninput="filtrarRegistros()" 
-                        placeholder="Buscar por apellidos, nombres o cédula..." 
-                        class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+        <!-- ========================================================= -->
+        <!-- VISTA 2: CRONOGRAMA DE VISITAS A COLEGIOS                 -->
+        <!-- ========================================================= -->
+        <div id="vista-cronograma" class="hidden space-y-6">
+            
+            <!-- Barra Superior de Acciones del Cronograma -->
+            <div class="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div>
+                    <h2 class="text-base sm:text-lg font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-calendar-days text-blue-600"></i>
+                        <span>Agenda y Calendario de Visitas</span>
+                    </h2>
+                    <p class="text-xs text-slate-500 mt-0.5">Visualiza las visitas programadas o agenda nuevas visitas a los colegios</p>
                 </div>
 
-                <!-- Filtro por Unidad Educativa -->
-                <div class="md:col-span-4">
-                    <select id="filtro-institucion" onchange="filtrarRegistros()" 
-                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-base focus:ring-2 focus:ring-blue-500 outline-none">
-                        <option value="">Todas las Unidades Educativas</option>
+                <div class="flex flex-wrap items-center gap-2.5 w-full sm:w-auto justify-end">
+                    <button type="button" onclick="exportarExcelVisitas()" 
+                        class="flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-sm font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-file-excel"></i>
+                        <span>Exportar Solo Visitas</span>
+                    </button>
+
+                    <button type="button" onclick="abrirModalVisita()" 
+                        class="flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-sm font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-md transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-calendar-plus"></i>
+                        <span>Nueva Visita</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Métricas del Cronograma -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold text-slate-500 uppercase">Total Visitas Agendadas</p>
+                        <p class="text-2xl font-extrabold text-slate-800 mt-1" id="visita-stat-total">0</p>
+                    </div>
+                    <div class="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-calendar-check"></i>
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold text-amber-600 uppercase">Programadas (Pendientes)</p>
+                        <p class="text-2xl font-extrabold text-amber-600 mt-1" id="visita-stat-programadas">0</p>
+                    </div>
+                    <div class="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-hourglass-half"></i>
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold text-emerald-600 uppercase">Visitas Realizadas</p>
+                        <p class="text-2xl font-extrabold text-emerald-600 mt-1" id="visita-stat-realizadas">0</p>
+                    </div>
+                    <div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Selector de Modo de Visualización (Calendario vs Lista) y Filtros -->
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col lg:flex-row justify-between items-center gap-3">
+                <!-- Toggle Calendario / Lista -->
+                <div class="flex bg-slate-100 p-1 rounded-xl w-full lg:w-auto">
+                    <button type="button" id="btn-modo-calendario" onclick="cambiarModoCronograma('calendario')"
+                        class="flex-1 lg:flex-none px-4 py-2 rounded-lg text-xs font-bold bg-white text-blue-700 shadow-sm transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-calendar"></i>
+                        <span>Vista Calendario</span>
+                    </button>
+                    <button type="button" id="btn-modo-lista" onclick="cambiarModoCronograma('lista')"
+                        class="flex-1 lg:flex-none px-4 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-list-ul"></i>
+                        <span>Vista Lista Detallada</span>
+                    </button>
+                </div>
+
+                <!-- Filtros -->
+                <div class="flex flex-col sm:flex-row items-center gap-2.5 w-full lg:w-auto">
+                    <div class="relative w-full sm:w-64">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-sm"></i>
+                        <input type="text" id="busqueda-visitas" oninput="renderizarCronograma()" 
+                            placeholder="Buscar colegio o nota..." 
+                            class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-300 rounded-xl text-base focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+
+                    <select id="filtro-estado-visita" onchange="renderizarCronograma()" 
+                        class="w-full sm:w-auto px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-base focus:ring-2 focus:ring-blue-500 outline-none">
+                        <option value="todas">Todas las visitas</option>
+                        <option value="Programada">Solo Programadas</option>
+                        <option value="Realizada">Solo Realizadas</option>
                     </select>
                 </div>
+            </div>
 
-                <!-- Filtro por Estado de Asistencia -->
-                <div class="md:col-span-3">
-                    <select id="filtro-estado" onchange="filtrarRegistros()" 
-                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-base focus:ring-2 focus:ring-blue-500 outline-none">
-                        <option value="todos">Estado: Todos</option>
-                        <option value="pendientes">Pendientes de Asistencia</option>
-                        <option value="asistentes">Ya Registrados (Asistieron)</option>
-                    </select>
+            <!-- SUB-VISTA A: CALENDARIO VISUAL MENSUAL -->
+            <div id="subvista-calendario" class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <!-- Navegación del Mes -->
+                <div class="bg-slate-900 text-white px-4 sm:px-6 py-4 flex items-center justify-between">
+                    <button type="button" onclick="cambiarMesCalendario(-1)" 
+                        class="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center transition" title="Mes anterior">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                    <div class="text-center">
+                        <h3 id="calendario-mes-titulo" class="text-base sm:text-lg font-extrabold capitalize tracking-wide">Mes Año</h3>
+                        <button type="button" onclick="irAHoyCalendario()" class="text-[11px] text-amber-300 hover:underline font-medium">
+                            Volver a hoy
+                        </button>
+                    </div>
+                    <button type="button" onclick="cambiarMesCalendario(1)" 
+                        class="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center transition" title="Mes siguiente">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </div>
+
+                <!-- Encabezado Días de la Semana -->
+                <div class="grid grid-cols-7 bg-slate-100 border-b border-slate-200 text-center text-[11px] sm:text-xs font-bold text-slate-600 uppercase py-2.5">
+                    <div>Dom</div>
+                    <div>Lun</div>
+                    <div>Mar</div>
+                    <div>Mié</div>
+                    <div>Jue</div>
+                    <div>Vie</div>
+                    <div>Sáb</div>
+                </div>
+
+                <!-- Cuadrícula de Días del Mes -->
+                <div id="calendario-grid" class="grid grid-cols-7 divide-x divide-y divide-slate-200 bg-slate-200"></div>
+
+                <!-- Panel Detalle del Día Seleccionado -->
+                <div id="detalle-dia-calendario" class="p-4 sm:p-6 bg-slate-50 border-t border-slate-200">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                        <h4 class="text-sm sm:text-base font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-calendar-day text-blue-600"></i>
+                            <span id="titulo-dia-seleccionado">Visitas del día seleccionado</span>
+                        </h4>
+                        <button type="button" onclick="abrirModalVisitaConFecha()" 
+                            class="text-xs font-bold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition self-start sm:self-auto">
+                            <i class="fa-solid fa-plus mr-1"></i> Agendar en esta fecha
+                        </button>
+                    </div>
+                    <div id="lista-visitas-dia" class="space-y-3"></div>
                 </div>
             </div>
-        </div>
 
-        <!-- Indicador de Carga -->
-        <div id="loader" class="text-center py-12">
-            <i class="fa-solid fa-circle-notch fa-spin text-3xl text-blue-600 mb-3"></i>
-            <p class="text-slate-500 font-medium">Cargando estudiantes desde Supabase...</p>
-        </div>
+            <!-- SUB-VISTA B: LISTADO GENERAL DE VISITAS -->
+            <div id="subvista-lista" class="hidden space-y-3">
+                <div id="contenedor-visitas" class="space-y-3"></div>
 
-        <!-- Caja de Errores (Sin alert) -->
-        <div id="error-box" class="hidden bg-red-50 border border-red-200 text-red-700 p-4 rounded-2xl mb-6 text-sm"></div>
+                <div id="sin-visitas" class="hidden text-center py-12 bg-white rounded-2xl border border-slate-200">
+                    <i class="fa-solid fa-calendar-xmark text-4xl text-slate-300 mb-3"></i>
+                    <p class="text-slate-600 font-medium">No hay visitas registradas con esos filtros.</p>
+                    <p class="text-xs text-slate-400 mt-1">Haz clic en "Nueva Visita" para agendar una Unidad Educativa.</p>
+                </div>
+            </div>
 
-        <!-- Lista de Estudiantes -->
-        <div id="contenedor-registros" class="hidden space-y-3"></div>
-
-        <!-- Mensaje Sin Resultados -->
-        <div id="sin-resultados" class="hidden text-center py-12 bg-white rounded-2xl border border-slate-200">
-            <i class="fa-solid fa-folder-open text-4xl text-slate-300 mb-3"></i>
-            <p class="text-slate-600 font-medium">No se encontraron estudiantes con los filtros aplicados.</p>
         </div>
 
     </main>
+
+    <!-- Modal Independiente para Agendar / Editar Visita -->
+    <div id="modal-visita" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden transform transition-all">
+            <div class="bg-blue-900 text-white px-6 py-4 flex justify-between items-center">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-amber-400 text-slate-900 flex items-center justify-center font-bold">
+                        <i class="fa-solid fa-calendar-plus" id="icono-modal-visita"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base sm:text-lg font-bold leading-snug" id="titulo-modal-visita">Agendar Nueva Visita</h3>
+                        <p class="text-[11px] text-blue-200">Complete los datos para guardar en el cronograma</p>
+                    </div>
+                </div>
+                <button type="button" onclick="cerrarModalVisita()" class="text-white/70 hover:text-white text-xl p-1.5 rounded-lg">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form id="form-visita" onsubmit="guardarVisita(event)" class="p-6 space-y-4">
+                <input type="hidden" id="visita-id">
+
+                <!-- Selección de Colegio -->
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600 mb-1.5">
+                        Unidad Educativa / Colegio <span class="text-red-500">*</span>
+                    </label>
+                    <select id="visita-colegio" required
+                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-base focus:ring-2 focus:ring-blue-500 outline-none">
+                        <option value="">Seleccione un colegio...</option>
+                    </select>
+                </div>
+
+                <!-- Fecha y Hora en 2 columnas -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-600 mb-1.5">
+                            Fecha de Visita <span class="text-red-500">*</span>
+                        </label>
+                        <input type="date" id="visita-fecha" required
+                            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-base focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-600 mb-1.5">
+                            Hora <span class="text-red-500">*</span>
+                        </label>
+                        <input type="time" id="visita-hora" required
+                            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-base focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                </div>
+
+                <!-- Descripción / Observaciones -->
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600 mb-1.5">
+                        Descripción / Motivo de la Visita <span class="text-red-500">*</span>
+                    </label>
+                    <textarea id="visita-descripcion" required rows="3"
+                        placeholder="Ej: Socialización con rector, entrega de invitaciones y verificación de abanderados..."
+                        class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-base focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
+                </div>
+
+                <div class="pt-3 flex items-center justify-end gap-2 border-t border-slate-100">
+                    <button type="button" onclick="cerrarModalVisita()" 
+                        class="px-4 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 transition">
+                        Cancelar
+                    </button>
+                    <button type="submit" id="btn-guardar-visita"
+                        class="px-5 py-2.5 rounded-xl text-sm font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-md transition flex items-center gap-2">
+                        <i class="fa-solid fa-check"></i>
+                        <span>Guardar Visita</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <!-- Modal de Toma de Asistencia y Captura de Datos -->
     <div id="modal-asistencia" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
@@ -256,6 +514,26 @@
         </div>
     </div>
 
+    <!-- Modal de Confirmación para Eliminar Visita -->
+    <div id="modal-eliminar-visita" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 text-center space-y-4">
+            <input type="hidden" id="eliminar-visita-id">
+            <div class="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-xl mx-auto">
+                <i class="fa-solid fa-trash-can"></i>
+            </div>
+            <h4 class="text-base font-bold text-slate-900">¿Eliminar visita del cronograma?</h4>
+            <p class="text-xs text-slate-500">Esta acción borrará permanentemente la visita agendada de la base de datos.</p>
+            <div class="flex justify-center gap-3 pt-2">
+                <button type="button" onclick="cerrarModalEliminarVisita()" class="px-4 py-2 rounded-xl text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 transition">
+                    Cancelar
+                </button>
+                <button type="button" onclick="ejecutarEliminacionVisita()" class="px-4 py-2 rounded-xl text-sm font-semibold text-white bg-red-600 hover:bg-red-700 transition">
+                    Sí, eliminar
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Notificación Toast Flotante -->
     <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 text-sm font-medium">
         <i class="fa-solid fa-circle-check text-emerald-400 text-lg" id="toast-icon"></i>
@@ -269,33 +547,74 @@
         const SUPABASE_URL = 'https://hjlsudhspfbwoualdkea.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_8jqhwZkSvDjk3GT9ln7CWw_frhhM7xo';
         const TABLA = 'abanderados_asistencia';
+        const TABLA_VISITAS = 'cronograma_visitas';
 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let todosLosEstudiantes = [];
         let estudiantesFiltrados = [];
+        let todasLasVisitas = [];
+        let listaColegiosUnicos = [];
+
+        // Estado del Calendario Visual
+        let modoCronograma = 'calendario'; // 'calendario' o 'lista'
+        let fechaActualCalendario = new Date();
+        let diaSeleccionadoStr = new Date().toISOString().slice(0, 10);
 
         // Normalizar nombres de Unidades Educativas para evitar duplicados en filtros y reportes
         function normalizarInstitucion(nombre) {
-            if (!nombre) return 'SIN INSTITUCIÓN';
+            if (!nombre) return '';
             return nombre
                 .toUpperCase()
-                .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Eliminar tildes
-                .replace(/[“”"'.]/g, "") // Eliminar comillas y puntos
-                .replace(/\s+/g, " ") // Colapsar espacios múltiples
+                .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                .replace(/["'“”‘’]/g, '')
+                .replace(/\.+$/, '')
+                .replace(/\s+/g, ' ')
                 .trim();
         }
 
-        // Inicializar al cargar la página
+        // Inicialización al cargar la página
         document.addEventListener('DOMContentLoaded', () => {
-            cargarDatos();
+            cargarTodo();
         });
 
-        // Obtener registros desde Supabase
-        async function cargarDatos() {
+        async function cargarTodo() {
             const iconRefresh = document.getElementById('icon-refresh');
-            iconRefresh.classList.add('fa-spin');
-            document.getElementById('error-box').classList.add('hidden');
+            if (iconRefresh) iconRefresh.classList.add('fa-spin');
+            try {
+                await Promise.all([cargarDatos(), cargarVisitas()]);
+            } finally {
+                if (iconRefresh) iconRefresh.classList.remove('fa-spin');
+            }
+        }
+
+        // Cambio entre pestañas principales
+        function cambiarVista(vista) {
+            const vistaAsis = document.getElementById('vista-asistencia');
+            const vistaCron = document.getElementById('vista-cronograma');
+            const tabAsis = document.getElementById('tab-asistencia');
+            const tabCron = document.getElementById('tab-cronograma');
+
+            if (vista === 'asistencia') {
+                vistaAsis.classList.remove('hidden');
+                vistaCron.classList.add('hidden');
+                tabAsis.className = 'py-3.5 px-4 text-sm font-bold border-b-2 border-blue-700 text-blue-700 flex items-center gap-2 transition';
+                tabCron.className = 'py-3.5 px-4 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2 transition';
+            } else {
+                vistaAsis.classList.add('hidden');
+                vistaCron.classList.remove('hidden');
+                tabCron.className = 'py-3.5 px-4 text-sm font-bold border-b-2 border-blue-700 text-blue-700 flex items-center gap-2 transition';
+                tabAsis.className = 'py-3.5 px-4 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2 transition';
+                renderizarCronograma();
+            }
+        }
+
+        // ==========================================
+        // FUNCIONES DE CONTROL DE ASISTENCIA
+        // ==========================================
+        async function cargarDatos() {
+            const errorBox = document.getElementById('error-box');
+            if (errorBox) errorBox.classList.add('hidden');
 
             try {
                 const { data, error } = await supabaseClient
@@ -306,60 +625,70 @@
 
                 if (error) throw error;
 
-                // Asignar clave normalizada para agrupar colegios escritos con leves diferencias
-                todosLosEstudiantes = (data || []).map(est => ({
-                    ...est,
-                    institucion_normalizada: normalizarInstitucion(est.institucion)
+                todosLosEstudiantes = (data || []).map(e => ({
+                    ...e,
+                    institucion_normalizada: normalizarInstitucion(e.institucion)
                 }));
 
-                poblarFiltroInstituciones();
+                poblarSelectoresInstituciones();
                 actualizarEstadisticas();
                 filtrarRegistros();
 
                 document.getElementById('loader').classList.add('hidden');
                 document.getElementById('contenedor-registros').classList.remove('hidden');
             } catch (err) {
-                console.error('Error al cargar:', err);
+                console.error('Error al cargar asistencia:', err);
                 document.getElementById('loader').classList.add('hidden');
-                const errorBox = document.getElementById('error-box');
-                errorBox.innerHTML = `<strong>Error de conexión con Supabase:</strong> ${err.message}`;
-                errorBox.classList.remove('hidden');
-            } finally {
-                iconRefresh.classList.remove('fa-spin');
+                if (errorBox) {
+                    errorBox.innerHTML = `<strong>Error de conexión con Supabase:</strong> ${err.message}. Verifica tu conexión o las políticas RLS.`;
+                    errorBox.classList.remove('hidden');
+                }
             }
         }
 
-        // Llenar selector de Unidades Educativas sin duplicados
-        function poblarFiltroInstituciones() {
-            const select = document.getElementById('filtro-institucion');
-            const valorActual = select.value;
-
-            const mapaInstituciones = new Map();
-            todosLosEstudiantes.forEach(est => {
-                const clave = est.institucion_normalizada;
-                if (!mapaInstituciones.has(clave)) {
-                    const nombreLimpio = (est.institucion || 'SIN INSTITUCIÓN')
-                        .toUpperCase()
-                        .replace(/\.+$/, '')
-                        .trim();
-                    mapaInstituciones.set(clave, nombreLimpio);
+        function poblarSelectoresInstituciones() {
+            const mapaColegios = new Map();
+            todosLosEstudiantes.forEach(e => {
+                const norm = e.institucion_normalizada;
+                if (norm && !mapaColegios.has(norm)) {
+                    const limpio = (e.institucion || '').toUpperCase().replace(/\.+$/, '').trim();
+                    mapaColegios.set(norm, limpio);
                 }
             });
 
-            const listaOrdenada = Array.from(mapaInstituciones.entries())
-                .sort((a, b) => a[1].localeCompare(b[1], 'es'));
+            listaColegiosUnicos = Array.from(mapaColegios.entries())
+                .map(([norm, label]) => ({ norm, label }))
+                .sort((a, b) => a.label.localeCompare(b.label, 'es'));
 
-            select.innerHTML = `<option value="">Todas las Unidades Educativas (${listaOrdenada.length})</option>`;
-            listaOrdenada.forEach(([clave, nombreVisible]) => {
-                const opt = document.createElement('option');
-                opt.value = clave;
-                opt.textContent = nombreVisible;
-                select.appendChild(opt);
-            });
-            select.value = valorActual;
+            // 1. Filtro en Control de Asistencia
+            const selectFiltro = document.getElementById('filtro-institucion');
+            if (selectFiltro) {
+                const valActual = selectFiltro.value;
+                selectFiltro.innerHTML = `<option value="">Todas las Unidades Educativas (${listaColegiosUnicos.length})</option>`;
+                listaColegiosUnicos.forEach(item => {
+                    const opt = document.createElement('option');
+                    opt.value = item.norm;
+                    opt.textContent = item.label;
+                    selectFiltro.appendChild(opt);
+                });
+                selectFiltro.value = valActual;
+            }
+
+            // 2. Selector en Modal de Nueva Visita
+            const selectModalVisita = document.getElementById('visita-colegio');
+            if (selectModalVisita) {
+                const valVisitaActual = selectModalVisita.value;
+                selectModalVisita.innerHTML = '<option value="">Seleccione un colegio...</option>';
+                listaColegiosUnicos.forEach(item => {
+                    const opt = document.createElement('option');
+                    opt.value = item.label;
+                    opt.textContent = item.label;
+                    selectModalVisita.appendChild(opt);
+                });
+                selectModalVisita.value = valVisitaActual;
+            }
         }
 
-        // Actualizar métricas superiores
         function actualizarEstadisticas() {
             const total = todosLosEstudiantes.length;
             const asistentes = todosLosEstudiantes.filter(e => e.asistio).length;
@@ -372,22 +701,21 @@
             document.getElementById('stat-porcentaje').textContent = porcentaje + '%';
         }
 
-        // Filtrar registros en pantalla
         function filtrarRegistros() {
             const texto = document.getElementById('input-busqueda').value.toLowerCase().trim();
-            const institucion = document.getElementById('filtro-institucion').value;
+            const instNorm = document.getElementById('filtro-institucion').value;
             const estado = document.getElementById('filtro-estado').value;
 
             estudiantesFiltrados = todosLosEstudiantes.filter(est => {
-                const coincideTexto = !texto || 
+                const coincideTexto = !texto ||
                     (est.apellidos_nombres && est.apellidos_nombres.toLowerCase().includes(texto)) ||
                     (est.cedula_abanderado && est.cedula_abanderado.includes(texto)) ||
                     (est.institucion && est.institucion.toLowerCase().includes(texto));
 
-                const coincideInst = !institucion || est.institucion_normalizada === institucion;
+                const coincideInst = !instNorm || est.institucion_normalizada === instNorm;
 
-                const coincideEstado = estado === 'todos' || 
-                    (estado === 'asistentes' && est.asistio) || 
+                const coincideEstado = estado === 'todos' ||
+                    (estado === 'asistentes' && est.asistio) ||
                     (estado === 'pendientes' && !est.asistio);
 
                 return coincideTexto && coincideInst && coincideEstado;
@@ -396,7 +724,6 @@
             renderizarLista();
         }
 
-        // Renderizar tarjetas de estudiantes
         function renderizarLista() {
             const contenedor = document.getElementById('contenedor-registros');
             const sinResultados = document.getElementById('sin-resultados');
@@ -410,8 +737,8 @@
             sinResultados.classList.add('hidden');
             contenedor.innerHTML = estudiantesFiltrados.map(est => {
                 const esAsistente = est.asistio === true;
-                const badgeDignidad = est.dignidad && est.dignidad.toLowerCase().includes('abanderado') 
-                    ? 'bg-amber-100 text-amber-800 border-amber-200' 
+                const badgeDignidad = est.dignidad?.toLowerCase().includes('abanderado')
+                    ? 'bg-amber-100 text-amber-800 border-amber-200'
                     : 'bg-blue-100 text-blue-800 border-blue-200';
 
                 return `
@@ -420,9 +747,6 @@
                         <div class="flex flex-wrap items-center gap-2">
                             <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${badgeDignidad}">
                                 ${est.dignidad || 'Sin dignidad'}
-                            </span>
-                            <span class="text-xs text-slate-400 font-medium">
-                                <i class="fa-solid fa-location-dot mr-1"></i>${est.centro || 'Manta'}
                             </span>
                             ${esAsistente ? `
                                 <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
@@ -438,7 +762,7 @@
                         </p>
 
                         ${esAsistente ? `
-                            <div class="pt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-700 bg-white/90 p-2.5 rounded-xl border border-emerald-100">
+                            <div class="pt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-700 bg-white/80 p-2 rounded-xl border border-emerald-100">
                                 <span><strong class="text-slate-500">Cédula:</strong> ${est.cedula_abanderado || '-'}</span>
                                 <span><strong class="text-slate-500">Tel:</strong> ${est.telefono_abanderado || '-'}</span>
                                 <span><strong class="text-slate-500">Correo:</strong> ${est.correo_abanderado || '-'}</span>
@@ -466,7 +790,6 @@
             }).join('');
         }
 
-        // Abrir modal de captura de datos
         function abrirModal(id) {
             const est = todosLosEstudiantes.find(e => e.id === id);
             if (!est) return;
@@ -488,14 +811,12 @@
             }
 
             document.getElementById('modal-asistencia').classList.remove('hidden');
-            setTimeout(() => document.getElementById('input-cedula').focus(), 100);
         }
 
         function cerrarModal() {
             document.getElementById('modal-asistencia').classList.add('hidden');
         }
 
-        // Guardar asistencia y actualizar datos en Supabase
         async function guardarAsistencia(e) {
             e.preventDefault();
             const id = parseInt(document.getElementById('modal-id').value);
@@ -533,14 +854,13 @@
                 cerrarModal();
                 mostrarToast('Asistencia y datos guardados en Supabase', 'success');
             } catch (err) {
-                mostrarToast('Error al guardar: ' + err.message, 'error');
+                mostrarToast('Error al guardar en Supabase: ' + err.message, 'error');
             } finally {
                 btnGuardar.disabled = false;
                 btnGuardar.innerHTML = '<i class="fa-solid fa-check"></i> <span>Confirmar Asistencia</span>';
             }
         }
 
-        // Gestión del modal personalizado de anulación
         function abrirModalAnular() {
             document.getElementById('modal-confirmar-anulacion').classList.remove('hidden');
         }
@@ -574,13 +894,438 @@
                 actualizarEstadisticas();
                 filtrarRegistros();
                 cerrarModal();
-                mostrarToast('Asistencia anulada', 'success');
+                mostrarToast('Marca de asistencia quitada', 'success');
             } catch (err) {
                 mostrarToast('Error al actualizar: ' + err.message, 'error');
             }
         }
 
-        // Exportar informe completo en Excel (.xlsx) con 3 hojas detalladas
+        // ==========================================
+        // FUNCIONES DE CRONOGRAMA Y CALENDARIO DE VISITAS
+        // ==========================================
+        function cambiarModoCronograma(modo) {
+            modoCronograma = modo;
+            const btnCal = document.getElementById('btn-modo-calendario');
+            const btnLis = document.getElementById('btn-modo-lista');
+            const subCal = document.getElementById('subvista-calendario');
+            const subLis = document.getElementById('subvista-lista');
+
+            if (modo === 'calendario') {
+                subCal.classList.remove('hidden');
+                subLis.classList.add('hidden');
+                btnCal.className = 'flex-1 lg:flex-none px-4 py-2 rounded-lg text-xs font-bold bg-white text-blue-700 shadow-sm transition flex items-center justify-center gap-2';
+                btnLis.className = 'flex-1 lg:flex-none px-4 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition flex items-center justify-center gap-2';
+            } else {
+                subCal.classList.add('hidden');
+                subLis.classList.remove('hidden');
+                btnLis.className = 'flex-1 lg:flex-none px-4 py-2 rounded-lg text-xs font-bold bg-white text-blue-700 shadow-sm transition flex items-center justify-center gap-2';
+                btnCal.className = 'flex-1 lg:flex-none px-4 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition flex items-center justify-center gap-2';
+            }
+            renderizarCronograma();
+        }
+
+        function cambiarMesCalendario(delta) {
+            fechaActualCalendario = new Date(
+                fechaActualCalendario.getFullYear(),
+                fechaActualCalendario.getMonth() + delta,
+                1
+            );
+            renderizarCalendario();
+        }
+
+        function irAHoyCalendario() {
+            const hoy = new Date();
+            fechaActualCalendario = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+            diaSeleccionadoStr = hoy.toISOString().slice(0, 10);
+            renderizarCalendario();
+        }
+
+        function seleccionarDiaCalendario(fechaStr) {
+            diaSeleccionadoStr = fechaStr;
+            renderizarCalendario();
+        }
+
+        function abrirModalVisita() {
+            resetearFormVisita();
+            document.getElementById('visita-fecha').value = diaSeleccionadoStr || new Date().toISOString().slice(0, 10);
+            document.getElementById('modal-visita').classList.remove('hidden');
+        }
+
+        function abrirModalVisitaConFecha() {
+            abrirModalVisita();
+        }
+
+        function cerrarModalVisita() {
+            document.getElementById('modal-visita').classList.add('hidden');
+            resetearFormVisita();
+        }
+
+        async function cargarVisitas() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from(TABLA_VISITAS)
+                    .select('*')
+                    .order('fecha_visita', { ascending: true })
+                    .order('hora_visita', { ascending: true });
+
+                if (error) {
+                    console.warn('Tabla cronograma_visitas aún no creada:', error.message);
+                    return;
+                }
+
+                todasLasVisitas = data || [];
+                actualizarEstadisticasVisitas();
+                renderizarCronograma();
+            } catch (err) {
+                console.error('Error cargando cronograma:', err);
+            }
+        }
+
+        function actualizarEstadisticasVisitas() {
+            const total = todasLasVisitas.length;
+            const realizadas = todasLasVisitas.filter(v => v.estado === 'Realizada').length;
+            const programadas = total - realizadas;
+
+            document.getElementById('badge-visitas').textContent = total;
+            document.getElementById('visita-stat-total').textContent = total;
+            document.getElementById('visita-stat-programadas').textContent = programadas;
+            document.getElementById('visita-stat-realizadas').textContent = realizadas;
+        }
+
+        async function guardarVisita(e) {
+            e.preventDefault();
+            const idEdicion = document.getElementById('visita-id').value;
+            const institucion = document.getElementById('visita-colegio').value.trim();
+            const fecha_visita = document.getElementById('visita-fecha').value;
+            const hora_visita = document.getElementById('visita-hora').value;
+            const descripcion = document.getElementById('visita-descripcion').value.trim();
+
+            if (!institucion || !fecha_visita || !hora_visita || !descripcion) return;
+
+            const btn = document.getElementById('btn-guardar-visita');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
+
+            try {
+                const payload = {
+                    institucion,
+                    institucion_normalizada: normalizarInstitucion(institucion),
+                    fecha_visita,
+                    hora_visita,
+                    descripcion
+                };
+
+                if (idEdicion) {
+                    const { error } = await supabaseClient
+                        .from(TABLA_VISITAS)
+                        .update(payload)
+                        .eq('id', parseInt(idEdicion));
+                    if (error) throw error;
+                    mostrarToast('Visita actualizada correctamente', 'success');
+                } else {
+                    payload.estado = 'Programada';
+                    const { error } = await supabaseClient
+                        .from(TABLA_VISITAS)
+                        .insert([payload]);
+                    if (error) throw error;
+                    mostrarToast('Visita agendada en el calendario', 'success');
+                }
+
+                // Enfocar el calendario en la fecha guardada
+                diaSeleccionadoStr = fecha_visita;
+                const [anio, mes] = fecha_visita.split('-');
+                fechaActualCalendario = new Date(parseInt(anio, 10), parseInt(mes, 10) - 1, 1);
+
+                cerrarModalVisita();
+                await cargarVisitas();
+            } catch (err) {
+                mostrarToast('Error: Ejecuta primero el SQL de cronograma_visitas en Supabase (' + err.message + ')', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> <span>Guardar Visita</span>';
+            }
+        }
+
+        function editarVisita(id) {
+            const visita = todasLasVisitas.find(v => v.id === id);
+            if (!visita) return;
+
+            document.getElementById('visita-id').value = visita.id;
+            document.getElementById('visita-colegio').value = visita.institucion;
+            document.getElementById('visita-fecha').value = visita.fecha_visita;
+            document.getElementById('visita-hora').value = visita.hora_visita.slice(0, 5);
+            document.getElementById('visita-descripcion').value = visita.descripcion;
+
+            document.getElementById('titulo-modal-visita').textContent = 'Editar Visita Programada';
+            document.getElementById('icono-modal-visita').className = 'fa-solid fa-pen-to-square';
+            document.getElementById('btn-guardar-visita').innerHTML = '<i class="fa-solid fa-save"></i> <span>Guardar Cambios</span>';
+
+            document.getElementById('modal-visita').classList.remove('hidden');
+        }
+
+        function resetearFormVisita() {
+            document.getElementById('form-visita').reset();
+            document.getElementById('visita-id').value = '';
+            document.getElementById('titulo-modal-visita').textContent = 'Agendar Nueva Visita';
+            document.getElementById('icono-modal-visita').className = 'fa-solid fa-calendar-plus';
+            document.getElementById('btn-guardar-visita').innerHTML = '<i class="fa-solid fa-check"></i> <span>Guardar Visita</span>';
+        }
+
+        async function alternarEstadoVisita(id) {
+            const visita = todasLasVisitas.find(v => v.id === id);
+            if (!visita) return;
+
+            const nuevoEstado = visita.estado === 'Realizada' ? 'Programada' : 'Realizada';
+
+            try {
+                const { error } = await supabaseClient
+                    .from(TABLA_VISITAS)
+                    .update({ estado: nuevoEstado })
+                    .eq('id', id);
+
+                if (error) throw error;
+
+                visita.estado = nuevoEstado;
+                actualizarEstadisticasVisitas();
+                renderizarCronograma();
+                mostrarToast(`Visita marcada como ${nuevoEstado}`, 'success');
+            } catch (err) {
+                mostrarToast('Error al cambiar estado: ' + err.message, 'error');
+            }
+        }
+
+        function abrirModalEliminarVisita(id) {
+            document.getElementById('eliminar-visita-id').value = id;
+            document.getElementById('modal-eliminar-visita').classList.remove('hidden');
+        }
+
+        function cerrarModalEliminarVisita() {
+            document.getElementById('modal-eliminar-visita').classList.add('hidden');
+        }
+
+        async function ejecutarEliminacionVisita() {
+            const id = parseInt(document.getElementById('eliminar-visita-id').value);
+            cerrarModalEliminarVisita();
+
+            try {
+                const { error } = await supabaseClient
+                    .from(TABLA_VISITAS)
+                    .delete()
+                    .eq('id', id);
+
+                if (error) throw error;
+
+                todasLasVisitas = todasLasVisitas.filter(v => v.id !== id);
+                actualizarEstadisticasVisitas();
+                renderizarCronograma();
+                mostrarToast('Visita eliminada del cronograma', 'success');
+            } catch (err) {
+                mostrarToast('Error al eliminar: ' + err.message, 'error');
+            }
+        }
+
+        function formatearFechaLegible(fechaStr) {
+            if (!fechaStr) return '';
+            const [anio, mes, dia] = fechaStr.split('-');
+            const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+            return `${dia} ${meses[parseInt(mes, 10) - 1]} ${anio}`;
+        }
+
+        function obtenerVisitasFiltradas() {
+            const texto = document.getElementById('busqueda-visitas').value.toLowerCase().trim();
+            const filtroEstado = document.getElementById('filtro-estado-visita').value;
+
+            return todasLasVisitas.filter(v => {
+                const coincideTexto = !texto ||
+                    v.institucion.toLowerCase().includes(texto) ||
+                    v.descripcion.toLowerCase().includes(texto);
+                const coincideEstado = filtroEstado === 'todas' || v.estado === filtroEstado;
+                return coincideTexto && coincideEstado;
+            });
+        }
+
+        function construirTarjetaVisita(v) {
+            const realizada = v.estado === 'Realizada';
+            const horaCorta = v.hora_visita ? v.hora_visita.slice(0, 5) : '';
+
+            return `
+            <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border ${realizada ? 'border-emerald-300 bg-emerald-50/20' : 'border-slate-200'} hover:shadow-md transition flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                <div class="flex items-start gap-4">
+                    <div class="shrink-0 w-24 text-center p-2.5 rounded-xl border ${realizada ? 'bg-emerald-100/70 border-emerald-200 text-emerald-900' : 'bg-blue-50 border-blue-200 text-blue-900'}">
+                        <p class="text-xs font-extrabold uppercase">${formatearFechaLegible(v.fecha_visita)}</p>
+                        <p class="text-sm font-bold mt-1 flex items-center justify-center gap-1">
+                            <i class="fa-regular fa-clock text-xs"></i> ${horaCorta}
+                        </p>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${realizada ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-amber-100 text-amber-800 border-amber-200'}">
+                                <i class="fa-solid ${realizada ? 'fa-check-double' : 'fa-calendar-day'} mr-1"></i>${v.estado.toUpperCase()}
+                            </span>
+                        </div>
+                        <h4 class="text-base font-bold text-slate-900">${v.institucion}</h4>
+                        <p class="text-sm text-slate-600 leading-relaxed">${v.descripcion}</p>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap items-center justify-end gap-2 pt-3 lg:pt-0 border-t lg:border-t-0 border-slate-100 shrink-0">
+                    <button onclick="alternarEstadoVisita(${v.id})" 
+                        class="px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${realizada ? 'bg-amber-100 text-amber-800 hover:bg-amber-200' : 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm'}">
+                        <i class="fa-solid ${realizada ? 'fa-rotate-left' : 'fa-check'}"></i>
+                        <span>${realizada ? 'Marcar Pendiente' : 'Marcar Realizada'}</span>
+                    </button>
+
+                    <button onclick="editarVisita(${v.id})" 
+                        class="px-3 py-2 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition flex items-center gap-1.5" title="Editar visita">
+                        <i class="fa-solid fa-pen"></i>
+                        <span>Editar</span>
+                    </button>
+
+                    <button onclick="abrirModalEliminarVisita(${v.id})" 
+                        class="px-3 py-2 rounded-xl text-xs font-semibold bg-red-50 text-red-600 hover:bg-red-100 transition flex items-center gap-1.5" title="Eliminar visita">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+            `;
+        }
+
+        function renderizarCalendario() {
+            const filtradas = obtenerVisitasFiltradas();
+            const anio = fechaActualCalendario.getFullYear();
+            const mes = fechaActualCalendario.getMonth();
+
+            const nombresMeses = [
+                'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+            ];
+            document.getElementById('calendario-mes-titulo').textContent = `${nombresMeses[mes]} ${anio}`;
+
+            const primerDiaSemana = new Date(anio, mes, 1).getDay();
+            const totalDiasMes = new Date(anio, mes + 1, 0).getDate();
+            const hoyStr = new Date().toISOString().slice(0, 10);
+
+            const grid = document.getElementById('calendario-grid');
+            let celdasHTML = '';
+
+            // Celdas vacías antes del día 1
+            for (let i = 0; i < primerDiaSemana; i++) {
+                celdasHTML += `<div class="bg-slate-50/70 min-h-[78px] sm:min-h-[105px] p-1.5"></div>`;
+            }
+
+            // Días del mes
+            for (let dia = 1; dia <= totalDiasMes; dia++) {
+                const mesPadded = String(mes + 1).padStart(2, '0');
+                const diaPadded = String(dia).padStart(2, '0');
+                const fechaCell = `${anio}-${mesPadded}-${diaPadded}`;
+
+                const visitasDia = filtradas.filter(v => v.fecha_visita === fechaCell);
+                const esHoy = fechaCell === hoyStr;
+                const esSeleccionado = fechaCell === diaSeleccionadoStr;
+
+                const badgesEventos = visitasDia.slice(0, 2).map(v => {
+                    const colorChip = v.estado === 'Realizada'
+                        ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
+                        : 'bg-blue-100 text-blue-800 border-blue-200';
+                    const horaShort = v.hora_visita ? v.hora_visita.slice(0, 5) : '';
+                    return `
+                        <div class="text-[10px] leading-tight px-1.5 py-0.5 rounded border truncate font-medium ${colorChip}" title="${horaShort} - ${v.institucion}">
+                            <span class="font-bold">${horaShort}</span> ${v.institucion}
+                        </div>
+                    `;
+                }).join('');
+
+                const extraBadge = visitasDia.length > 2
+                    ? `<div class="text-[10px] font-bold text-slate-500 pl-1">+${visitasDia.length - 2} más</div>`
+                    : '';
+
+                celdasHTML += `
+                    <div onclick="seleccionarDiaCalendario('${fechaCell}')" 
+                        class="min-h-[78px] sm:min-h-[105px] p-1.5 sm:p-2 cursor-pointer transition flex flex-col justify-between ${esSeleccionado ? 'bg-blue-50/90 ring-2 ring-inset ring-blue-600' : 'bg-white hover:bg-slate-50'}">
+                        <div class="flex items-center justify-between">
+                            <span class="w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-xs sm:text-sm font-bold ${esHoy ? 'bg-blue-600 text-white shadow-sm' : (esSeleccionado ? 'text-blue-700' : 'text-slate-700')}">
+                                ${dia}
+                            </span>
+                            ${visitasDia.length > 0 ? `<span class="sm:hidden w-2 h-2 rounded-full bg-blue-600"></span>` : ''}
+                        </div>
+                        <div class="hidden sm:block space-y-1 mt-1">
+                            ${badgesEventos}
+                            ${extraBadge}
+                        </div>
+                        ${visitasDia.length > 0 ? `<div class="sm:hidden text-[10px] font-bold text-blue-700 text-center mt-1">${visitasDia.length} vis.</div>` : ''}
+                    </div>
+                `;
+            }
+
+            grid.innerHTML = celdasHTML;
+
+            // Renderizar detalle del día seleccionado debajo del calendario
+            document.getElementById('titulo-dia-seleccionado').textContent = `Visitas del ${formatearFechaLegible(diaSeleccionadoStr)}`;
+            const visitasDelDiaSeleccionado = filtradas.filter(v => v.fecha_visita === diaSeleccionadoStr);
+            const listaDiaContenedor = document.getElementById('lista-visitas-dia');
+
+            if (visitasDelDiaSeleccionado.length === 0) {
+                listaDiaContenedor.innerHTML = `
+                    <div class="bg-white rounded-xl p-6 text-center border border-dashed border-slate-300 text-slate-500 text-sm">
+                        No hay visitas agendadas para esta fecha.
+                    </div>
+                `;
+            } else {
+                listaDiaContenedor.innerHTML = visitasDelDiaSeleccionado.map(v => construirTarjetaVisita(v)).join('');
+            }
+        }
+
+        function renderizarCronograma() {
+            if (modoCronograma === 'calendario') {
+                renderizarCalendario();
+                return;
+            }
+
+            const contenedor = document.getElementById('contenedor-visitas');
+            const sinVisitas = document.getElementById('sin-visitas');
+            const filtradas = obtenerVisitasFiltradas();
+
+            if (filtradas.length === 0) {
+                contenedor.innerHTML = '';
+                sinVisitas.classList.remove('hidden');
+                return;
+            }
+
+            sinVisitas.classList.add('hidden');
+            contenedor.innerHTML = filtradas.map(v => construirTarjetaVisita(v)).join('');
+        }
+
+        // Exportar ÚNICAMENTE el reporte en Excel de las visitas agendadas
+        function exportarExcelVisitas() {
+            if (todasLasVisitas.length === 0) {
+                mostrarToast('No hay visitas registradas para exportar', 'error');
+                return;
+            }
+
+            const wb = XLSX.utils.book_new();
+
+            const datosVisitas = todasLasVisitas.map((v, idx) => ({
+                'N°': idx + 1,
+                'Fecha': v.fecha_visita || '',
+                'Hora': v.hora_visita ? v.hora_visita.slice(0, 5) : '',
+                'Unidad Educativa': v.institucion || '',
+                'Descripción / Motivo': v.descripcion || '',
+                'Estado': v.estado || 'Programada'
+            }));
+
+            const wsVisitas = XLSX.utils.json_to_sheet(datosVisitas);
+            wsVisitas['!cols'] = [
+                { wch: 5 }, { wch: 14 }, { wch: 10 }, { wch: 48 }, { wch: 55 }, { wch: 16 }
+            ];
+            XLSX.utils.book_append_sheet(wb, wsVisitas, 'Cronograma de Visitas');
+
+            const fechaHoy = new Date().toISOString().slice(0, 10);
+            XLSX.writeFile(wb, `Cronograma_Visitas_Colegios_Manta_${fechaHoy}.xlsx`);
+            mostrarToast('Reporte Excel de visitas descargado', 'success');
+        }
+
+        // Exportar informe completo en Excel (.xlsx) incluyendo hoja de Cronograma
         function exportarExcel() {
             if (todosLosEstudiantes.length === 0) {
                 mostrarToast('No hay datos para exportar', 'error');
@@ -677,9 +1422,27 @@
             ];
             XLSX.utils.book_append_sheet(wb, wsResumen, 'Resumen por Colegio');
 
+            // 4. HOJA 4: CRONOGRAMA DE VISITAS A COLEGIOS
+            const datosVisitas = todasLasVisitas.map((v, idx) => ({
+                'N°': idx + 1,
+                'Fecha': v.fecha_visita || '',
+                'Hora': v.hora_visita ? v.hora_visita.slice(0, 5) : '',
+                'Unidad Educativa': v.institucion || '',
+                'Descripción / Motivo': v.descripcion || '',
+                'Estado': v.estado || 'Programada'
+            }));
+
+            const wsVisitas = XLSX.utils.json_to_sheet(
+                datosVisitas.length > 0 ? datosVisitas : [{ 'Mensaje': 'No hay visitas agendadas en el cronograma' }]
+            );
+            wsVisitas['!cols'] = [
+                { wch: 5 }, { wch: 14 }, { wch: 10 }, { wch: 48 }, { wch: 55 }, { wch: 16 }
+            ];
+            XLSX.utils.book_append_sheet(wb, wsVisitas, 'Cronograma Visitas');
+
             // Generar nombre de archivo con fecha actual
             const fechaHoy = new Date().toISOString().slice(0, 10);
-            XLSX.writeFile(wb, `Informe_Asistencia_Abanderados_Manta_${fechaHoy}.xlsx`);
+            XLSX.writeFile(wb, `Informe_Asistencia_y_Visitas_Manta_${fechaHoy}.xlsx`);
             mostrarToast('Informe Excel completo descargado', 'success');
         }
 
