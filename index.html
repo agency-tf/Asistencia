@@ -2,1467 +2,696 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Control de Asistencia Abanderados - Manta</title>
-    <!-- Tailwind CSS para diseño responsivo -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UTPL Zona 4 | Algo Mágico Se Acerca — Navidad 2026</title>
+
+    <!-- Tipografías de Alta Gala Editorial -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400;1,600&family=Great+Vibes&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Iconos y Tailwind -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Cliente oficial de Supabase JS v2 -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- SheetJS para exportar reporte actualizado a Excel -->
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <!-- Iconos FontAwesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-        .glass-header {
-            background: linear-gradient(135deg, #003865 0%, #005596 100%);
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        gala: {
+                            sapphire: '#061539',
+                            royal: '#0E296B',
+                            glacier: '#BAE6FD',
+                            porcelain: '#FAF8F5',
+                            ivory: '#F2ECE1',
+                            gold: '#C6963E',
+                            goldBright: '#E9C982',
+                            goldDeep: '#8E651E',
+                            ink: '#0B1736'
+                        }
+                    },
+                    fontFamily: {
+                        serif: ['Cinzel', 'serif'],
+                        editorial: ['"Cormorant Garamond"', 'serif'],
+                        script: ['"Great Vibes"', 'cursive'],
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    }
+                }
+            }
         }
-        /* Evitar zoom automático en iOS/Android al enfocar campos de texto */
-        input, select, textarea {
-            font-size: 16px !important;
+    </script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background-color: #05112E;
+            background-image:
+                radial-gradient(circle at 50% 0%, rgba(186, 230, 253, 0.24) 0%, transparent 50%),
+                radial-gradient(circle at 18% 28%, rgba(233, 201, 130, 0.16) 0%, transparent 45%),
+                radial-gradient(circle at 82% 72%, rgba(56, 189, 248, 0.16) 0%, transparent 48%),
+                linear-gradient(180deg, #040D24 0%, #0A1E4D 52%, #051230 100%);
+            color: #FAF8F5;
+            overflow-x: hidden;
+        }
+
+        /* Resplandor Celestial Giratorio */
+        .celestial-halo {
+            position: fixed;
+            top: -220px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 780px;
+            height: 780px;
+            background: conic-gradient(
+                from 0deg,
+                transparent 0deg,
+                rgba(233, 201, 130, 0.12) 35deg,
+                transparent 70deg,
+                rgba(186, 230, 253, 0.12) 130deg,
+                transparent 180deg,
+                rgba(233, 201, 130, 0.12) 240deg,
+                transparent 300deg
+            );
+            border-radius: 50%;
+            filter: blur(28px);
+            pointer-events: none;
+            z-index: 1;
+            animation: spinHalo 42s linear infinite;
+        }
+
+        @keyframes spinHalo {
+            to { transform: translateX(-50%) rotate(360deg); }
+        }
+
+        /* Canvas de Nieve Cristalina */
+        #snow-canvas {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        /* Tarjeta Maestra de Porcelana Perlada & Oro */
+        .editorial-suite {
+            background:
+                radial-gradient(circle at 50% 0%, #FFFFFF 0%, #FAF8F5 55%, #F0E9DC 100%);
+            color: #0B1736;
+            box-shadow:
+                0 45px 110px -15px rgba(1, 6, 20, 0.85),
+                0 0 0 1px rgba(233, 201, 130, 0.65),
+                0 0 70px rgba(186, 230, 253, 0.18);
+        }
+
+        /* Cabecera Zafiro Imperial */
+        .sapphire-crown {
+            background:
+                radial-gradient(ellipse at 50% 100%, rgba(233, 201, 130, 0.25) 0%, transparent 65%),
+                radial-gradient(circle at 50% 18%, rgba(186, 230, 253, 0.22) 0%, transparent 55%),
+                linear-gradient(160deg, #061539 0%, #0E2A6E 55%, #071942 100%);
+        }
+
+        /* Oro Satinado Metálico */
+        .gold-foil-text {
+            background: linear-gradient(120deg, #9C7022 5%, #F5DFA6 34%, #C6963E 54%, #FFF3CE 76%, #8E651E 96%);
+            background-size: 220% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: foilFlow 5.5s linear infinite;
+        }
+
+        @keyframes foilFlow {
+            0% { background-position: 220% center; }
+            100% { background-position: -220% center; }
+        }
+
+        /* Bloque Escultural de Fecha en Oro & Zafiro */
+        .royal-date-card {
+            background:
+                radial-gradient(circle at 25% 15%, rgba(255, 255, 255, 0.2) 0%, transparent 55%),
+                linear-gradient(155deg, #091E52 0%, #0E2B73 55%, #061438 100%);
+            border: 1.5px solid #D7B162;
+            box-shadow:
+                0 22px 44px -12px rgba(9, 30, 82, 0.42),
+                inset 0 1px 0 rgba(255, 255, 255, 0.25);
+        }
+
+        /* Bloques en Cristal Perlado */
+        .pearl-city-card {
+            background: linear-gradient(155deg, #FFFFFF 0%, #F4EFE4 100%);
+            border: 1.5px solid rgba(198, 150, 62, 0.55);
+            box-shadow:
+                0 20px 40px -14px rgba(11, 23, 54, 0.14),
+                inset 0 1px 0 #FFFFFF;
+        }
+
+        /* Botón Joya Zafiro & Oro */
+        .btn-royal-gala {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, #081B4B 0%, #103282 50%, #07173E 100%);
+            color: #F7E3B0;
+            border: 1.5px solid #D7B162;
+            box-shadow: 0 18px 38px -10px rgba(8, 27, 75, 0.5);
+            transition: transform 0.28s ease, box-shadow 0.28s ease;
+        }
+        .btn-royal-gala::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -75%;
+            width: 45%;
+            height: 200%;
+            background: linear-gradient(to right, transparent, rgba(255, 243, 206, 0.45), transparent);
+            transform: rotate(25deg);
+            animation: gleamPass 3.8s infinite;
+        }
+        @keyframes gleamPass {
+            0%, 55% { left: -75%; }
+            100% { left: 135%; }
+        }
+        .btn-royal-gala:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 24px 46px -10px rgba(8, 27, 75, 0.65);
+        }
+
+        /* Animación de Entrada */
+        .reveal {
+            opacity: 0;
+            transform: translateY(22px);
+            animation: fadeUp 0.95s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        .d-1 { animation-delay: 0.1s; }
+        .d-2 { animation-delay: 0.24s; }
+        .d-3 { animation-delay: 0.38s; }
+        .d-4 { animation-delay: 0.52s; }
+
+        @keyframes fadeUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Modal */
+        .modal-backdrop {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .modal-backdrop.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-card {
+            transform: translateY(18px) scale(0.97);
+            transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .modal-backdrop.active .modal-card {
+            transform: translateY(0) scale(1);
+        }
+
+        /* Toast */
+        .toast-msg {
+            transform: translate(-50%, 100px);
+            opacity: 0;
+            transition: all 0.35s ease;
+        }
+        .toast-msg.visible {
+            transform: translate(-50%, 0);
+            opacity: 1;
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+<body class="font-sans antialiased selection:bg-gala-goldBright selection:text-gala-sapphire">
 
-    <!-- Cabecera Institucional -->
-    <header class="glass-header text-white shadow-lg sticky top-0 z-30">
-        <div class="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div class="flex items-center gap-3">
-                <div class="bg-amber-400 text-slate-900 p-2.5 rounded-xl font-bold text-xl shadow">
-                    <i class="fa-solid fa-award"></i>
-                </div>
-                <div>
-                    <h1 class="text-lg sm:text-xl font-bold tracking-tight">Asistencia Abanderados - Manta</h1>
-                    <p class="text-xs text-blue-200">Registro y Cronograma en Tiempo Real</p>
-                </div>
-            </div>
-            <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
-                <button onclick="cargarTodo()" class="bg-white/15 hover:bg-white/25 text-white px-3.5 py-2.5 rounded-xl text-sm font-medium transition flex items-center gap-2" title="Sincronizar con Supabase">
-                    <i class="fa-solid fa-rotate-right" id="icon-refresh"></i>
-                    <span class="hidden sm:inline">Sincronizar</span>
-                </button>
-                <button onclick="exportarExcel()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2.5 rounded-xl text-sm font-semibold shadow transition flex items-center gap-2">
-                    <i class="fa-solid fa-file-excel"></i>
-                    <span>Exportar Excel</span>
-                </button>
-            </div>
-        </div>
-    </header>
+    <!-- Halo Celestial Animado -->
+    <div class="celestial-halo" aria-hidden="true"></div>
 
-    <!-- Navegación por Pestañas (Asistencia vs Cronograma de Visitas) -->
-    <div class="bg-white border-b border-slate-200 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex gap-2 sm:gap-4">
-            <button id="tab-asistencia" onclick="cambiarVista('asistencia')" 
-                class="py-3.5 px-4 text-sm font-bold border-b-2 border-blue-700 text-blue-700 flex items-center gap-2 transition">
-                <i class="fa-solid fa-clipboard-user"></i>
-                <span>Control de Asistencia</span>
-            </button>
-            <button id="tab-cronograma" onclick="cambiarVista('cronograma')" 
-                class="py-3.5 px-4 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2 transition">
-                <i class="fa-solid fa-calendar-days"></i>
-                <span>Cronograma de Visitas</span>
-                <span id="badge-visitas" class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-0.5 rounded-full">0</span>
-            </button>
-        </div>
-    </div>
+    <!-- Nieve Cristalina a Pantalla Completa -->
+    <canvas id="snow-canvas" aria-hidden="true"></canvas>
 
-    <!-- Contenido Principal -->
-    <main class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8 flex-grow w-full">
+    <!-- =========================================================
+         COMPOSICIÓN PRINCIPAL — SAVE THE DATE NAVIDAD UTPL ZONA 4
+         ========================================================= -->
+    <main class="relative z-10 min-h-screen w-full flex flex-col items-center justify-center py-4 sm:py-6 px-3 sm:px-6">
 
-        <!-- ========================================================= -->
-        <!-- VISTA 1: CONTROL DE ASISTENCIA DE ESTUDIANTES             -->
-        <!-- ========================================================= -->
-        <div id="vista-asistencia">
-            <!-- Tarjetas de Estadísticas en Vivo -->
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-semibold text-slate-500 uppercase">Total Convocados</p>
-                        <p class="text-2xl font-extrabold text-slate-800 mt-1" id="stat-total">0</p>
+        <article class="reveal relative w-full max-w-[440px] md:max-w-[780px] rounded-[28px] sm:rounded-[32px] overflow-hidden editorial-suite">
+
+            <!-- Marco Interior de Joyería -->
+            <div class="absolute inset-2.5 sm:inset-3.5 border border-gala-gold/40 rounded-[22px] sm:rounded-[25px] pointer-events-none z-30"></div>
+
+            <!-- =====================================================
+                 SECCIÓN SUPERIOR: CIELO ZAFIRO Y CORONA NAVIDEÑA
+                 ===================================================== -->
+            <header class="sapphire-crown relative pt-6 pb-9 md:pt-7 md:pb-10 px-5 sm:px-10 text-center text-white overflow-hidden">
+
+                <!-- Estrellas Decorativas Sutiles -->
+                <div class="absolute inset-0 opacity-45 pointer-events-none" style="background-image: radial-gradient(#FFF7DF 1px, transparent 1px), radial-gradient(#BAE6FD 1px, transparent 1px); background-size: 46px 46px; background-position: 0 0, 23px 23px;"></div>
+
+                <!-- Fila Superior Compacta: Distintivo + Corona en Laptop, Apilado Compacto en Móvil -->
+                <div class="reveal d-1 relative z-10 flex flex-col md:flex-row items-center justify-center gap-2.5 md:gap-4 mb-3">
+                    <!-- Corona Navideña Compacta -->
+                    <div class="relative w-14 h-14 md:w-16 md:h-16 flex items-center justify-center shrink-0">
+                        <div class="absolute inset-1 rounded-full bg-gala-goldBright/20 blur-lg"></div>
+                        <svg class="w-14 h-14 md:w-16 md:h-16 drop-shadow-[0_6px_14px_rgba(233,201,130,0.45)]" viewBox="0 0 120 120" fill="none">
+                            <circle cx="60" cy="62" r="42" stroke="url(#wreathGold)" stroke-width="1.5" stroke-dasharray="3 3"/>
+                            <circle cx="60" cy="62" r="34" stroke="url(#wreathGold)" stroke-width="1"/>
+                            <path d="M24 72C18 62 18 48 26 38C28 47 26 56 24 72Z" fill="url(#wreathGold)"/>
+                            <path d="M32 88C22 80 18 68 21 56C26 65 28 74 32 88Z" fill="url(#wreathGold)" opacity="0.85"/>
+                            <path d="M46 99C34 95 26 86 25 75C32 82 38 89 46 99Z" fill="url(#wreathGold)" opacity="0.7"/>
+                            <path d="M96 72C102 62 102 48 94 38C92 47 94 56 96 72Z" fill="url(#wreathGold)"/>
+                            <path d="M88 88C98 80 102 68 99 56C94 65 92 74 88 88Z" fill="url(#wreathGold)" opacity="0.85"/>
+                            <path d="M74 99C86 95 94 86 95 75C88 82 82 89 74 99Z" fill="url(#wreathGold)" opacity="0.7"/>
+                            <path d="M60 6L63.2 18.8L76 22L63.2 25.2L60 38L56.8 25.2L44 22L56.8 18.8L60 6Z" fill="#FFFDF7"/>
+                            <g stroke="#BAE6FD" stroke-width="1.6" stroke-linecap="round">
+                                <line x1="60" y1="45" x2="60" y2="79"/>
+                                <line x1="45.3" y1="53.5" x2="74.7" y2="70.5"/>
+                                <line x1="74.7" y1="53.5" x2="45.3" y2="70.5"/>
+                            </g>
+                            <circle cx="60" cy="62" r="4" fill="#FFFDF7"/>
+                            <defs>
+                                <linearGradient id="wreathGold" x1="20" y1="10" x2="100" y2="105" gradientUnits="userSpaceOnUse">
+                                    <stop stop-color="#FFF5D6"/>
+                                    <stop offset="0.5" stop-color="#E9C982"/>
+                                    <stop offset="1" stop-color="#A67926"/>
+                                </linearGradient>
+                            </defs>
+                        </svg>
                     </div>
-                    <div class="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg">
-                        <i class="fa-solid fa-users"></i>
-                    </div>
-                </div>
 
-                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-semibold text-emerald-600 uppercase">Asistentes</p>
-                        <p class="text-2xl font-extrabold text-emerald-600 mt-1" id="stat-asistentes">0</p>
-                    </div>
-                    <div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg">
-                        <i class="fa-solid fa-user-check"></i>
+                    <div class="inline-flex items-center gap-2.5 px-4 py-1 rounded-full bg-white/[0.08] border border-gala-goldBright/45 backdrop-blur-md">
+                        <span class="w-1.5 h-1.5 rounded-full bg-gala-goldBright"></span>
+                        <span class="text-[10px] font-bold uppercase tracking-[0.34em] text-gala-goldBright">
+                            Universidad Técnica Particular de Loja
+                        </span>
+                        <span class="w-1.5 h-1.5 rounded-full bg-gala-goldBright"></span>
                     </div>
                 </div>
 
-                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-semibold text-amber-600 uppercase">Pendientes</p>
-                        <p class="text-2xl font-extrabold text-amber-600 mt-1" id="stat-pendientes">0</p>
-                    </div>
-                    <div class="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg">
-                        <i class="fa-solid fa-clock"></i>
-                    </div>
-                </div>
-
-                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-semibold text-indigo-600 uppercase">Avance</p>
-                        <p class="text-2xl font-extrabold text-indigo-600 mt-1" id="stat-porcentaje">0%</p>
-                    </div>
-                    <div class="w-11 h-11 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg">
-                        <i class="fa-solid fa-chart-pie"></i>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Barra de Búsqueda y Filtros -->
-            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 mb-6">
-                <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
-                    <!-- Buscador -->
-                    <div class="md:col-span-5 relative">
-                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-slate-400"></i>
-                        <input type="text" id="input-busqueda" oninput="filtrarRegistros()" 
-                            placeholder="Buscar por apellidos, nombres o cédula..." 
-                            class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
-                    </div>
-
-                    <!-- Filtro Institución -->
-                    <div class="md:col-span-4">
-                        <select id="filtro-institucion" onchange="filtrarRegistros()" 
-                            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-base focus:ring-2 focus:ring-blue-500 outline-none">
-                            <option value="">Todas las Unidades Educativas</option>
-                        </select>
-                    </div>
-
-                    <!-- Filtro Estado -->
-                    <div class="md:col-span-3">
-                        <select id="filtro-estado" onchange="filtrarRegistros()" 
-                            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-base focus:ring-2 focus:ring-blue-500 outline-none">
-                            <option value="todos">Estado: Todos</option>
-                            <option value="pendientes">Pendientes de Asistencia</option>
-                            <option value="asistentes">Ya Registrados (Asistieron)</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Indicador de Carga -->
-            <div id="loader" class="text-center py-12">
-                <i class="fa-solid fa-circle-notch fa-spin text-3xl text-blue-600 mb-3"></i>
-                <p class="text-slate-500 font-medium">Conectando con Supabase...</p>
-            </div>
-
-            <!-- Caja de Error -->
-            <div id="error-box" class="hidden bg-red-50 border border-red-200 text-red-700 p-4 rounded-2xl mb-6 text-sm"></div>
-
-            <!-- Listado de Estudiantes -->
-            <div id="contenedor-registros" class="hidden space-y-3"></div>
-
-            <!-- Mensaje Sin Resultados -->
-            <div id="sin-resultados" class="hidden text-center py-12 bg-white rounded-2xl border border-slate-200">
-                <i class="fa-solid fa-folder-open text-4xl text-slate-300 mb-3"></i>
-                <p class="text-slate-600 font-medium">No se encontraron estudiantes con los filtros aplicados.</p>
-            </div>
-        </div>
-
-        <!-- ========================================================= -->
-        <!-- VISTA 2: CRONOGRAMA DE VISITAS A COLEGIOS                 -->
-        <!-- ========================================================= -->
-        <div id="vista-cronograma" class="hidden space-y-6">
-            
-            <!-- Barra Superior de Acciones del Cronograma -->
-            <div class="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-4">
-                <div>
-                    <h2 class="text-base sm:text-lg font-bold text-slate-800 flex items-center gap-2">
-                        <i class="fa-solid fa-calendar-days text-blue-600"></i>
-                        <span>Agenda y Calendario de Visitas</span>
-                    </h2>
-                    <p class="text-xs text-slate-500 mt-0.5">Visualiza las visitas programadas o agenda nuevas visitas a los colegios</p>
-                </div>
-
-                <div class="flex flex-wrap items-center gap-2.5 w-full sm:w-auto justify-end">
-                    <button type="button" onclick="exportarExcelVisitas()" 
-                        class="flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-sm font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-file-excel"></i>
-                        <span>Exportar Solo Visitas</span>
-                    </button>
-
-                    <button type="button" onclick="abrirModalVisita()" 
-                        class="flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-sm font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-md transition flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-calendar-plus"></i>
-                        <span>Nueva Visita</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Métricas del Cronograma -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-semibold text-slate-500 uppercase">Total Visitas Agendadas</p>
-                        <p class="text-2xl font-extrabold text-slate-800 mt-1" id="visita-stat-total">0</p>
-                    </div>
-                    <div class="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg">
-                        <i class="fa-solid fa-calendar-check"></i>
-                    </div>
-                </div>
-
-                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-semibold text-amber-600 uppercase">Programadas (Pendientes)</p>
-                        <p class="text-2xl font-extrabold text-amber-600 mt-1" id="visita-stat-programadas">0</p>
-                    </div>
-                    <div class="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg">
-                        <i class="fa-solid fa-hourglass-half"></i>
-                    </div>
-                </div>
-
-                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-semibold text-emerald-600 uppercase">Visitas Realizadas</p>
-                        <p class="text-2xl font-extrabold text-emerald-600 mt-1" id="visita-stat-realizadas">0</p>
-                    </div>
-                    <div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg">
-                        <i class="fa-solid fa-circle-check"></i>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Selector de Modo de Visualización (Calendario vs Lista) y Filtros -->
-            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col lg:flex-row justify-between items-center gap-3">
-                <!-- Toggle Calendario / Lista -->
-                <div class="flex bg-slate-100 p-1 rounded-xl w-full lg:w-auto">
-                    <button type="button" id="btn-modo-calendario" onclick="cambiarModoCronograma('calendario')"
-                        class="flex-1 lg:flex-none px-4 py-2 rounded-lg text-xs font-bold bg-white text-blue-700 shadow-sm transition flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-calendar"></i>
-                        <span>Vista Calendario</span>
-                    </button>
-                    <button type="button" id="btn-modo-lista" onclick="cambiarModoCronograma('lista')"
-                        class="flex-1 lg:flex-none px-4 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-list-ul"></i>
-                        <span>Vista Lista Detallada</span>
-                    </button>
-                </div>
-
-                <!-- Filtros -->
-                <div class="flex flex-col sm:flex-row items-center gap-2.5 w-full lg:w-auto">
-                    <div class="relative w-full sm:w-64">
-                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-sm"></i>
-                        <input type="text" id="busqueda-visitas" oninput="renderizarCronograma()" 
-                            placeholder="Buscar colegio o nota..." 
-                            class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-300 rounded-xl text-base focus:ring-2 focus:ring-blue-500 outline-none">
-                    </div>
-
-                    <select id="filtro-estado-visita" onchange="renderizarCronograma()" 
-                        class="w-full sm:w-auto px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-base focus:ring-2 focus:ring-blue-500 outline-none">
-                        <option value="todas">Todas las visitas</option>
-                        <option value="Programada">Solo Programadas</option>
-                        <option value="Realizada">Solo Realizadas</option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- SUB-VISTA A: CALENDARIO VISUAL MENSUAL -->
-            <div id="subvista-calendario" class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                <!-- Navegación del Mes -->
-                <div class="bg-slate-900 text-white px-4 sm:px-6 py-4 flex items-center justify-between">
-                    <button type="button" onclick="cambiarMesCalendario(-1)" 
-                        class="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center transition" title="Mes anterior">
-                        <i class="fa-solid fa-chevron-left"></i>
-                    </button>
-                    <div class="text-center">
-                        <h3 id="calendario-mes-titulo" class="text-base sm:text-lg font-extrabold capitalize tracking-wide">Mes Año</h3>
-                        <button type="button" onclick="irAHoyCalendario()" class="text-[11px] text-amber-300 hover:underline font-medium">
-                            Volver a hoy
-                        </button>
-                    </div>
-                    <button type="button" onclick="cambiarMesCalendario(1)" 
-                        class="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center transition" title="Mes siguiente">
-                        <i class="fa-solid fa-chevron-right"></i>
-                    </button>
-                </div>
-
-                <!-- Encabezado Días de la Semana -->
-                <div class="grid grid-cols-7 bg-slate-100 border-b border-slate-200 text-center text-[11px] sm:text-xs font-bold text-slate-600 uppercase py-2.5">
-                    <div>Dom</div>
-                    <div>Lun</div>
-                    <div>Mar</div>
-                    <div>Mié</div>
-                    <div>Jue</div>
-                    <div>Vie</div>
-                    <div>Sáb</div>
-                </div>
-
-                <!-- Cuadrícula de Días del Mes -->
-                <div id="calendario-grid" class="grid grid-cols-7 divide-x divide-y divide-slate-200 bg-slate-200"></div>
-
-                <!-- Panel Detalle del Día Seleccionado -->
-                <div id="detalle-dia-calendario" class="p-4 sm:p-6 bg-slate-50 border-t border-slate-200">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
-                        <h4 class="text-sm sm:text-base font-bold text-slate-800 flex items-center gap-2">
-                            <i class="fa-solid fa-calendar-day text-blue-600"></i>
-                            <span id="titulo-dia-seleccionado">Visitas del día seleccionado</span>
-                        </h4>
-                        <button type="button" onclick="abrirModalVisitaConFecha()" 
-                            class="text-xs font-bold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition self-start sm:self-auto">
-                            <i class="fa-solid fa-plus mr-1"></i> Agendar en esta fecha
-                        </button>
-                    </div>
-                    <div id="lista-visitas-dia" class="space-y-3"></div>
-                </div>
-            </div>
-
-            <!-- SUB-VISTA B: LISTADO GENERAL DE VISITAS -->
-            <div id="subvista-lista" class="hidden space-y-3">
-                <div id="contenedor-visitas" class="space-y-3"></div>
-
-                <div id="sin-visitas" class="hidden text-center py-12 bg-white rounded-2xl border border-slate-200">
-                    <i class="fa-solid fa-calendar-xmark text-4xl text-slate-300 mb-3"></i>
-                    <p class="text-slate-600 font-medium">No hay visitas registradas con esos filtros.</p>
-                    <p class="text-xs text-slate-400 mt-1">Haz clic en "Nueva Visita" para agendar una Unidad Educativa.</p>
-                </div>
-            </div>
-
-        </div>
-
-    </main>
-
-    <!-- Modal Independiente para Agendar / Editar Visita -->
-    <div id="modal-visita" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden transform transition-all">
-            <div class="bg-blue-900 text-white px-6 py-4 flex justify-between items-center">
-                <div class="flex items-center gap-2.5">
-                    <div class="w-9 h-9 rounded-xl bg-amber-400 text-slate-900 flex items-center justify-center font-bold">
-                        <i class="fa-solid fa-calendar-plus" id="icono-modal-visita"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-base sm:text-lg font-bold leading-snug" id="titulo-modal-visita">Agendar Nueva Visita</h3>
-                        <p class="text-[11px] text-blue-200">Complete los datos para guardar en el cronograma</p>
-                    </div>
-                </div>
-                <button type="button" onclick="cerrarModalVisita()" class="text-white/70 hover:text-white text-xl p-1.5 rounded-lg">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-
-            <form id="form-visita" onsubmit="guardarVisita(event)" class="p-6 space-y-4">
-                <input type="hidden" id="visita-id">
-
-                <!-- Selección de Colegio -->
-                <div>
-                    <label class="block text-xs font-bold uppercase text-slate-600 mb-1.5">
-                        Unidad Educativa / Colegio <span class="text-red-500">*</span>
-                    </label>
-                    <select id="visita-colegio" required
-                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-base focus:ring-2 focus:ring-blue-500 outline-none">
-                        <option value="">Seleccione un colegio...</option>
-                    </select>
-                </div>
-
-                <!-- Fecha y Hora en 2 columnas -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold uppercase text-slate-600 mb-1.5">
-                            Fecha de Visita <span class="text-red-500">*</span>
-                        </label>
-                        <input type="date" id="visita-fecha" required
-                            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-base focus:ring-2 focus:ring-blue-500 outline-none">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold uppercase text-slate-600 mb-1.5">
-                            Hora <span class="text-red-500">*</span>
-                        </label>
-                        <input type="time" id="visita-hora" required
-                            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-base focus:ring-2 focus:ring-blue-500 outline-none">
-                    </div>
-                </div>
-
-                <!-- Descripción / Observaciones -->
-                <div>
-                    <label class="block text-xs font-bold uppercase text-slate-600 mb-1.5">
-                        Descripción / Motivo de la Visita <span class="text-red-500">*</span>
-                    </label>
-                    <textarea id="visita-descripcion" required rows="3"
-                        placeholder="Ej: Socialización con rector, entrega de invitaciones y verificación de abanderados..."
-                        class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-base focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
-                </div>
-
-                <div class="pt-3 flex items-center justify-end gap-2 border-t border-slate-100">
-                    <button type="button" onclick="cerrarModalVisita()" 
-                        class="px-4 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 transition">
-                        Cancelar
-                    </button>
-                    <button type="submit" id="btn-guardar-visita"
-                        class="px-5 py-2.5 rounded-xl text-sm font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-md transition flex items-center gap-2">
-                        <i class="fa-solid fa-check"></i>
-                        <span>Guardar Visita</span>
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal de Toma de Asistencia y Captura de Datos -->
-    <div id="modal-asistencia" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden transform transition-all">
-            <!-- Cabecera Modal -->
-            <div class="bg-blue-900 text-white px-6 py-4 flex justify-between items-center">
-                <div>
-                    <span class="text-xs uppercase tracking-wider text-amber-300 font-bold" id="modal-dignidad">Dignidad</span>
-                    <h3 class="text-lg font-bold leading-snug mt-0.5" id="modal-nombre">NOMBRE DEL ESTUDIANTE</h3>
-                </div>
-                <button type="button" onclick="cerrarModal()" class="text-white/70 hover:text-white text-xl p-1.5 rounded-lg">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-
-            <!-- Formulario de Datos Obligatorios -->
-            <form id="form-asistencia" onsubmit="guardarAsistencia(event)" class="p-6 space-y-4">
-                <input type="hidden" id="modal-id">
-
-                <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs text-slate-600">
-                    <p class="font-semibold text-slate-800 flex items-center gap-1.5">
-                        <i class="fa-solid fa-school text-blue-600"></i>
-                        <span id="modal-institucion">Institución Educativa</span>
+                <!-- Títulos Principales -->
+                <div class="reveal d-2 relative z-10">
+                    <p class="text-[10px] font-bold uppercase tracking-[0.38em] text-gala-glacier mb-1">
+                        Save the Date • Próximamente
+                    </p>
+                    <h1 class="font-serif text-[26px] sm:text-[38px] md:text-[42px] font-extrabold tracking-[0.07em] leading-[1.1] gold-foil-text">
+                        FIESTA DE NAVIDAD
+                    </h1>
+                    <p class="font-script text-[26px] sm:text-[34px] text-sky-100/95 mt-0.5 leading-tight">
+                        Una noche mágica por celebrar
                     </p>
                 </div>
 
-                <!-- Campo 1: Número de Cédula -->
-                <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-1">
-                        Número de Cédula <span class="text-red-500">*</span>
-                    </label>
-                    <div class="relative">
-                        <i class="fa-solid fa-id-card absolute left-3.5 top-3.5 text-slate-400"></i>
-                        <input type="text" id="input-cedula" required maxlength="10" pattern="[0-9]{10}"
-                            inputmode="numeric" placeholder="Ej: 1314567890 (10 dígitos)"
-                            oninput="this.value = this.value.replace(/[^0-9]/g, '')"
-                            class="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-xl text-base focus:ring-2 focus:ring-blue-600 focus:border-blue-600 outline-none">
+                <!-- Curva Panorámica Inferior de Transición -->
+                <svg class="absolute bottom-0 left-0 w-full h-5 sm:h-7 text-[#FAF8F5]" viewBox="0 0 700 40" preserveAspectRatio="none">
+                    <path d="M0 40 C 210 0, 490 0, 700 40 L 700 40 L 0 40 Z" fill="currentColor"/>
+                </svg>
+            </header>
+
+            <!-- =====================================================
+                 SECCIÓN INFERIOR: PORCELANA PERLADA, FECHA, HORA Y SEDE
+                 ===================================================== -->
+            <div class="relative z-10 px-5 pt-2 pb-7 sm:px-9 sm:pb-8 text-center">
+
+                <p class="reveal d-2 font-editorial italic text-[17px] sm:text-[21px] text-slate-700 leading-snug max-w-xl mx-auto mb-5">
+                    "Reserva esta fecha especial en tu agenda para compartir juntos la alegría y la magia de la Navidad."
+                </p>
+
+                <!-- TARJETAS ESCULTURALES HORIZONTALES (3 COLUMNAS EN LAPTOP, COMPACTAS EN IPHONE) -->
+                <div class="reveal d-3 grid grid-cols-3 gap-2.5 sm:gap-4 items-stretch mb-5">
+
+                    <!-- Fecha: Viernes 11 de Diciembre -->
+                    <div class="royal-date-card rounded-[18px] sm:rounded-[22px] py-3.5 px-2 sm:p-4 flex flex-col items-center justify-center text-white relative overflow-hidden">
+                        <span class="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.22em] sm:tracking-[0.3em] text-gala-glacier">
+                            Viernes
+                        </span>
+                        <span class="font-serif text-3xl sm:text-[44px] font-extrabold leading-none my-1 gold-foil-text">
+                            11
+                        </span>
+                        <span class="text-[9px] sm:text-[11px] font-bold uppercase tracking-[0.16em] sm:tracking-[0.24em] text-amber-100">
+                            Diciembre
+                        </span>
                     </div>
-                    <p class="text-[11px] text-slate-400 mt-1">Ingrese los 10 dígitos sin guiones.</p>
+
+                    <!-- Hora: 20:00 -->
+                    <div class="pearl-city-card rounded-[18px] sm:rounded-[22px] py-3.5 px-2 sm:p-4 flex flex-col items-center justify-center relative overflow-hidden">
+                        <div class="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gala-sapphire/10 text-gala-sapphire flex items-center justify-center mb-1">
+                            <i class="fa-regular fa-clock text-[11px] sm:text-xs"></i>
+                        </div>
+                        <span class="font-serif text-xl sm:text-[28px] font-extrabold text-gala-sapphire leading-none my-0.5">
+                            20:00
+                        </span>
+                        <span class="px-2.5 py-0.5 rounded-full bg-gala-sapphire text-gala-goldBright text-[9px] font-extrabold uppercase tracking-[0.22em] mt-1">
+                            Horas
+                        </span>
+                    </div>
+
+                    <!-- Ciudad: Santo Domingo -->
+                    <div class="pearl-city-card rounded-[18px] sm:rounded-[22px] py-3.5 px-2 sm:p-4 flex flex-col items-center justify-center relative overflow-hidden">
+                        <div class="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gala-sapphire text-gala-goldBright flex items-center justify-center shadow-sm mb-1">
+                            <i class="fa-solid fa-location-dot text-[10px] sm:text-xs"></i>
+                        </div>
+                        <span class="font-serif text-[12px] sm:text-[17px] font-extrabold text-gala-sapphire tracking-wide leading-tight">
+                            SANTO DOMINGO
+                        </span>
+                        <span class="text-[8px] sm:text-[10px] font-bold uppercase tracking-[0.14em] sm:tracking-[0.18em] text-gala-goldDeep mt-1">
+                            Lugar por revelar
+                        </span>
+                    </div>
+
                 </div>
 
-                <!-- Campo 2: Número de Teléfono -->
-                <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-1">
-                        Número de Teléfono / WhatsApp <span class="text-red-500">*</span>
-                    </label>
-                    <div class="relative">
-                        <i class="fa-solid fa-mobile-screen-button absolute left-3.5 top-3.5 text-slate-400"></i>
-                        <input type="tel" id="input-telefono" required maxlength="10" pattern="[0-9]{9,10}"
-                            inputmode="tel" placeholder="Ej: 0991234567"
-                            oninput="this.value = this.value.replace(/[^0-9]/g, '')"
-                            class="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-xl text-base focus:ring-2 focus:ring-blue-600 focus:border-blue-600 outline-none">
+                <!-- Cuenta Regresiva + Botón en Fila en Laptop / Apilados Compactos en iPhone -->
+                <div class="reveal d-3 flex flex-col md:flex-row items-center justify-between gap-4 bg-white/75 border border-gala-gold/35 rounded-2xl p-3.5 sm:px-5 sm:py-4 mb-5">
+                    <div class="grid grid-cols-4 gap-2 w-full md:w-auto md:min-w-[290px]">
+                        <div class="rounded-xl bg-white border border-gala-gold/30 py-2 px-1 shadow-xs">
+                            <span id="cd-days" class="block font-serif text-base sm:text-lg font-extrabold text-gala-sapphire leading-tight">--</span>
+                            <span class="text-[8px] font-bold uppercase tracking-[0.18em] text-slate-400">Días</span>
+                        </div>
+                        <div class="rounded-xl bg-white border border-gala-gold/30 py-2 px-1 shadow-xs">
+                            <span id="cd-hours" class="block font-serif text-base sm:text-lg font-extrabold text-gala-sapphire leading-tight">--</span>
+                            <span class="text-[8px] font-bold uppercase tracking-[0.18em] text-slate-400">Horas</span>
+                        </div>
+                        <div class="rounded-xl bg-white border border-gala-gold/30 py-2 px-1 shadow-xs">
+                            <span id="cd-mins" class="block font-serif text-base sm:text-lg font-extrabold text-gala-sapphire leading-tight">--</span>
+                            <span class="text-[8px] font-bold uppercase tracking-[0.18em] text-slate-400">Min</span>
+                        </div>
+                        <div class="rounded-xl bg-white border border-gala-gold/30 py-2 px-1 shadow-xs">
+                            <span id="cd-secs" class="block font-serif text-base sm:text-lg font-extrabold text-gala-sapphire leading-tight">--</span>
+                            <span class="text-[8px] font-bold uppercase tracking-[0.18em] text-slate-400">Seg</span>
+                        </div>
                     </div>
-                </div>
 
-                <!-- Campo 3: Correo Electrónico -->
-                <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-1">
-                        Correo Electrónico <span class="text-red-500">*</span>
-                    </label>
-                    <div class="relative">
-                        <i class="fa-solid fa-envelope absolute left-3.5 top-3.5 text-slate-400"></i>
-                        <input type="email" id="input-correo" required
-                            placeholder="estudiante@ejemplo.com"
-                            class="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-xl text-base focus:ring-2 focus:ring-blue-600 focus:border-blue-600 outline-none">
-                    </div>
-                </div>
-
-                <!-- Botones de Acción -->
-                <div class="pt-3 flex items-center justify-between gap-3 border-t border-slate-100">
-                    <button type="button" id="btn-anular" onclick="abrirModalAnular()" 
-                        class="hidden text-xs text-red-600 hover:text-red-800 font-semibold px-3 py-2 rounded-xl hover:bg-red-50 transition">
-                        <i class="fa-solid fa-rotate-left mr-1"></i> Quitar asistencia
+                    <button onclick="abrirModalCalendario()" class="btn-royal-gala w-full md:w-auto md:flex-1 py-3.5 px-5 rounded-xl font-bold text-[11px] uppercase tracking-[0.2em] flex items-center justify-center gap-2.5 cursor-pointer">
+                        <i class="fa-regular fa-calendar-plus text-sm text-gala-goldBright"></i>
+                        <span>Agendar Fecha</span>
                     </button>
-                    <div class="flex gap-2 ml-auto">
-                        <button type="button" onclick="cerrarModal()" 
-                            class="px-4 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 transition">
-                            Cancelar
-                        </button>
-                        <button type="submit" id="btn-guardar"
-                            class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md transition flex items-center gap-2">
-                            <i class="fa-solid fa-check"></i>
-                            <span>Confirmar Asistencia</span>
-                        </button>
-                    </div>
                 </div>
-            </form>
+
+                <!-- Firma Institucional -->
+                <footer class="reveal d-4 pt-3 border-t border-gala-gold/30 flex items-center justify-center md:justify-end">
+                    <div class="inline-flex items-center gap-2">
+                        <span class="w-1.5 h-1.5 rounded-full bg-gala-gold"></span>
+                        <p class="font-editorial italic font-semibold text-base sm:text-lg tracking-[0.03em] text-gala-sapphire">
+                            UTPL
+                        </p>
+                    </div>
+                </footer>
+
+            </div>
+        </article>
+    </main>
+
+    <!-- =========================================================
+         MODAL SELECTOR UNIVERSAL DE CALENDARIO
+         ========================================================= -->
+    <div id="calendar-modal" class="modal-backdrop fixed inset-0 z-50 bg-gala-sapphire/80 backdrop-blur-md flex items-center justify-center p-4" onclick="cerrarModalCalendario()">
+        <div class="modal-card relative w-full max-w-md rounded-3xl bg-gala-porcelain border-2 border-gala-gold p-6 sm:p-8 shadow-2xl text-gala-ink" onclick="event.stopPropagation()">
+            
+            <button onclick="cerrarModalCalendario()" aria-label="Cerrar" class="absolute top-4 right-4 w-9 h-9 rounded-full bg-gala-sapphire/10 hover:bg-gala-sapphire/20 flex items-center justify-center text-gala-sapphire transition cursor-pointer">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="text-center mb-6">
+                <span class="text-[10px] font-bold uppercase tracking-[0.3em] text-gala-goldDeep">
+                    Viernes 11 de Diciembre • 20:00 • Santo Domingo
+                </span>
+                <h3 class="font-serif text-xl sm:text-2xl font-bold text-gala-sapphire mt-1.5">
+                    Guardar en Calendario
+                </h3>
+            </div>
+
+            <div class="space-y-3">
+                <a id="link-google-cal" href="#" target="_blank" rel="noopener noreferrer" onclick="mostrarAviso('Abriendo Google Calendar...')" class="flex items-center justify-between p-4 rounded-2xl bg-white hover:bg-sky-50/70 border border-gala-gold/35 shadow-sm transition">
+                    <div class="flex items-center gap-3.5">
+                        <div class="w-10 h-10 rounded-xl bg-gala-sapphire text-gala-goldBright flex items-center justify-center text-lg">
+                            <i class="fa-brands fa-google"></i>
+                        </div>
+                        <div class="text-left">
+                            <div class="text-sm font-bold text-gala-sapphire">Google Calendar</div>
+                            <div class="text-[11px] text-slate-500">Android y cuenta Google</div>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-arrow-up-right-from-square text-xs text-gala-gold"></i>
+                </a>
+
+                <button onclick="descargarICS('Apple Calendar')" class="w-full flex items-center justify-between p-4 rounded-2xl bg-white hover:bg-sky-50/70 border border-gala-gold/35 shadow-sm transition cursor-pointer">
+                    <div class="flex items-center gap-3.5">
+                        <div class="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center text-xl">
+                            <i class="fa-brands fa-apple"></i>
+                        </div>
+                        <div class="text-left">
+                            <div class="text-sm font-bold text-gala-sapphire">Apple Calendar</div>
+                            <div class="text-[11px] text-slate-500">iPhone, iPad y Mac</div>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-download text-xs text-gala-gold"></i>
+                </button>
+
+                <a id="link-outlook-web" href="#" target="_blank" rel="noopener noreferrer" onclick="mostrarAviso('Abriendo Outlook...')" class="flex items-center justify-between p-4 rounded-2xl bg-white hover:bg-sky-50/70 border border-gala-gold/35 shadow-sm transition">
+                    <div class="flex items-center gap-3.5">
+                        <div class="w-10 h-10 rounded-xl bg-sky-700 text-white flex items-center justify-center text-lg">
+                            <i class="fa-solid fa-envelope"></i>
+                        </div>
+                        <div class="text-left">
+                            <div class="text-sm font-bold text-gala-sapphire">Outlook / Microsoft 365</div>
+                            <div class="text-[11px] text-slate-500">Calendario de correo</div>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-arrow-up-right-from-square text-xs text-gala-gold"></i>
+                </a>
+
+                <button onclick="descargarICS('Calendario de Escritorio')" class="w-full flex items-center justify-between p-4 rounded-2xl bg-white hover:bg-sky-50/70 border border-gala-gold/35 shadow-sm transition cursor-pointer">
+                    <div class="flex items-center gap-3.5">
+                        <div class="w-10 h-10 rounded-xl bg-gala-goldBright text-gala-sapphire flex items-center justify-center text-lg">
+                            <i class="fa-solid fa-calendar-day"></i>
+                        </div>
+                        <div class="text-left">
+                            <div class="text-sm font-bold text-gala-sapphire">Archivo de Calendario (.ics)</div>
+                            <div class="text-[11px] text-slate-500">Outlook escritorio y otras apps</div>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-download text-xs text-gala-gold"></i>
+                </button>
+            </div>
         </div>
     </div>
 
-    <!-- Modal de Confirmación Personalizado (Reemplaza confirm() nativo) -->
-    <div id="modal-confirmar-anulacion" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 text-center space-y-4">
-            <div class="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-xl mx-auto">
-                <i class="fa-solid fa-triangle-exclamation"></i>
-            </div>
-            <h4 class="text-base font-bold text-slate-900">¿Quitar marca de asistencia?</h4>
-            <p class="text-xs text-slate-500">El estudiante volverá al estado pendiente, aunque sus datos ingresados permanecerán guardados.</p>
-            <div class="flex justify-center gap-3 pt-2">
-                <button type="button" onclick="cerrarModalAnular()" class="px-4 py-2 rounded-xl text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 transition">
-                    Cancelar
-                </button>
-                <button type="button" onclick="ejecutarAnulacionAsistencia()" class="px-4 py-2 rounded-xl text-sm font-semibold text-white bg-red-600 hover:bg-red-700 transition">
-                    Sí, quitar
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal de Confirmación para Eliminar Visita -->
-    <div id="modal-eliminar-visita" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 text-center space-y-4">
-            <input type="hidden" id="eliminar-visita-id">
-            <div class="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-xl mx-auto">
-                <i class="fa-solid fa-trash-can"></i>
-            </div>
-            <h4 class="text-base font-bold text-slate-900">¿Eliminar visita del cronograma?</h4>
-            <p class="text-xs text-slate-500">Esta acción borrará permanentemente la visita agendada de la base de datos.</p>
-            <div class="flex justify-center gap-3 pt-2">
-                <button type="button" onclick="cerrarModalEliminarVisita()" class="px-4 py-2 rounded-xl text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 transition">
-                    Cancelar
-                </button>
-                <button type="button" onclick="ejecutarEliminacionVisita()" class="px-4 py-2 rounded-xl text-sm font-semibold text-white bg-red-600 hover:bg-red-700 transition">
-                    Sí, eliminar
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Notificación Toast Flotante -->
-    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 text-sm font-medium">
-        <i class="fa-solid fa-circle-check text-emerald-400 text-lg" id="toast-icon"></i>
-        <span id="toast-msg">Asistencia guardada correctamente</span>
+    <!-- Aviso Toast -->
+    <div id="toast-msg" class="toast-msg fixed bottom-6 left-1/2 z-50 bg-gala-sapphire text-white px-6 py-3.5 rounded-2xl shadow-2xl border border-gala-goldBright flex items-center gap-3 max-w-[92vw]">
+        <i class="fa-solid fa-circle-check text-gala-goldBright text-lg"></i>
+        <span id="toast-text" class="text-xs sm:text-sm font-semibold">Fecha guardada en tu calendario</span>
     </div>
 
     <script>
-        // ==========================================
-        // CONFIGURACIÓN DE SUPABASE
-        // ==========================================
-        const SUPABASE_URL = 'https://hjlsudhspfbwoualdkea.supabase.co';
-        const SUPABASE_ANON_KEY = 'sb_publishable_8jqhwZkSvDjk3GT9ln7CWw_frhhM7xo';
-        const TABLA = 'abanderados_asistencia';
-        const TABLA_VISITAS = 'cronograma_visitas';
+        // 1. NIEVE CRISTALINA CON COPOS GEOMÉTRICOS Y DESTELLOS DORADOS
+        function iniciarNieve() {
+            const canvas = document.getElementById('snow-canvas');
+            const ctx = canvas.getContext('2d');
+            let width = 0;
+            let height = 0;
+            let copos = [];
 
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        let todosLosEstudiantes = [];
-        let estudiantesFiltrados = [];
-        let todasLasVisitas = [];
-        let listaColegiosUnicos = [];
-
-        // Estado del Calendario Visual
-        let modoCronograma = 'calendario'; // 'calendario' o 'lista'
-        let fechaActualCalendario = new Date();
-        let diaSeleccionadoStr = new Date().toISOString().slice(0, 10);
-
-        // Normalizar nombres de Unidades Educativas para evitar duplicados en filtros y reportes
-        function normalizarInstitucion(nombre) {
-            if (!nombre) return '';
-            return nombre
-                .toUpperCase()
-                .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-                .replace(/["'“”‘’]/g, '')
-                .replace(/\.+$/, '')
-                .replace(/\s+/g, ' ')
-                .trim();
-        }
-
-        // Inicialización al cargar la página
-        document.addEventListener('DOMContentLoaded', () => {
-            cargarTodo();
-        });
-
-        async function cargarTodo() {
-            const iconRefresh = document.getElementById('icon-refresh');
-            if (iconRefresh) iconRefresh.classList.add('fa-spin');
-            try {
-                await Promise.all([cargarDatos(), cargarVisitas()]);
-            } finally {
-                if (iconRefresh) iconRefresh.classList.remove('fa-spin');
+            function redimensionar() {
+                width = canvas.width = window.innerWidth;
+                height = canvas.height = window.innerHeight;
             }
-        }
 
-        // Cambio entre pestañas principales
-        function cambiarVista(vista) {
-            const vistaAsis = document.getElementById('vista-asistencia');
-            const vistaCron = document.getElementById('vista-cronograma');
-            const tabAsis = document.getElementById('tab-asistencia');
-            const tabCron = document.getElementById('tab-cronograma');
-
-            if (vista === 'asistencia') {
-                vistaAsis.classList.remove('hidden');
-                vistaCron.classList.add('hidden');
-                tabAsis.className = 'py-3.5 px-4 text-sm font-bold border-b-2 border-blue-700 text-blue-700 flex items-center gap-2 transition';
-                tabCron.className = 'py-3.5 px-4 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2 transition';
-            } else {
-                vistaAsis.classList.add('hidden');
-                vistaCron.classList.remove('hidden');
-                tabCron.className = 'py-3.5 px-4 text-sm font-bold border-b-2 border-blue-700 text-blue-700 flex items-center gap-2 transition';
-                tabAsis.className = 'py-3.5 px-4 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2 transition';
-                renderizarCronograma();
-            }
-        }
-
-        // ==========================================
-        // FUNCIONES DE CONTROL DE ASISTENCIA
-        // ==========================================
-        async function cargarDatos() {
-            const errorBox = document.getElementById('error-box');
-            if (errorBox) errorBox.classList.add('hidden');
-
-            try {
-                const { data, error } = await supabaseClient
-                    .from(TABLA)
-                    .select('*')
-                    .order('institucion', { ascending: true })
-                    .order('apellidos_nombres', { ascending: true });
-
-                if (error) throw error;
-
-                todosLosEstudiantes = (data || []).map(e => ({
-                    ...e,
-                    institucion_normalizada: normalizarInstitucion(e.institucion)
-                }));
-
-                poblarSelectoresInstituciones();
-                actualizarEstadisticas();
-                filtrarRegistros();
-
-                document.getElementById('loader').classList.add('hidden');
-                document.getElementById('contenedor-registros').classList.remove('hidden');
-            } catch (err) {
-                console.error('Error al cargar asistencia:', err);
-                document.getElementById('loader').classList.add('hidden');
-                if (errorBox) {
-                    errorBox.innerHTML = `<strong>Error de conexión con Supabase:</strong> ${err.message}. Verifica tu conexión o las políticas RLS.`;
-                    errorBox.classList.remove('hidden');
+            function dibujarCristal(x, y, radio, rotacion, opacidad) {
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.rotate(rotacion);
+                ctx.strokeStyle = `rgba(224, 242, 254, ${opacidad})`;
+                ctx.lineWidth = 1.15;
+                for (let i = 0; i < 3; i++) {
+                    ctx.rotate(Math.PI / 3);
+                    ctx.beginPath();
+                    ctx.moveTo(-radio, 0);
+                    ctx.lineTo(radio, 0);
+                    ctx.stroke();
                 }
-            }
-        }
-
-        function poblarSelectoresInstituciones() {
-            const mapaColegios = new Map();
-            todosLosEstudiantes.forEach(e => {
-                const norm = e.institucion_normalizada;
-                if (norm && !mapaColegios.has(norm)) {
-                    const limpio = (e.institucion || '').toUpperCase().replace(/\.+$/, '').trim();
-                    mapaColegios.set(norm, limpio);
-                }
-            });
-
-            listaColegiosUnicos = Array.from(mapaColegios.entries())
-                .map(([norm, label]) => ({ norm, label }))
-                .sort((a, b) => a.label.localeCompare(b.label, 'es'));
-
-            // 1. Filtro en Control de Asistencia
-            const selectFiltro = document.getElementById('filtro-institucion');
-            if (selectFiltro) {
-                const valActual = selectFiltro.value;
-                selectFiltro.innerHTML = `<option value="">Todas las Unidades Educativas (${listaColegiosUnicos.length})</option>`;
-                listaColegiosUnicos.forEach(item => {
-                    const opt = document.createElement('option');
-                    opt.value = item.norm;
-                    opt.textContent = item.label;
-                    selectFiltro.appendChild(opt);
-                });
-                selectFiltro.value = valActual;
+                ctx.restore();
             }
 
-            // 2. Selector en Modal de Nueva Visita
-            const selectModalVisita = document.getElementById('visita-colegio');
-            if (selectModalVisita) {
-                const valVisitaActual = selectModalVisita.value;
-                selectModalVisita.innerHTML = '<option value="">Seleccione un colegio...</option>';
-                listaColegiosUnicos.forEach(item => {
-                    const opt = document.createElement('option');
-                    opt.value = item.label;
-                    opt.textContent = item.label;
-                    selectModalVisita.appendChild(opt);
-                });
-                selectModalVisita.value = valVisitaActual;
-            }
-        }
-
-        function actualizarEstadisticas() {
-            const total = todosLosEstudiantes.length;
-            const asistentes = todosLosEstudiantes.filter(e => e.asistio).length;
-            const pendientes = total - asistentes;
-            const porcentaje = total > 0 ? Math.round((asistentes / total) * 100) : 0;
-
-            document.getElementById('stat-total').textContent = total;
-            document.getElementById('stat-asistentes').textContent = asistentes;
-            document.getElementById('stat-pendientes').textContent = pendientes;
-            document.getElementById('stat-porcentaje').textContent = porcentaje + '%';
-        }
-
-        function filtrarRegistros() {
-            const texto = document.getElementById('input-busqueda').value.toLowerCase().trim();
-            const instNorm = document.getElementById('filtro-institucion').value;
-            const estado = document.getElementById('filtro-estado').value;
-
-            estudiantesFiltrados = todosLosEstudiantes.filter(est => {
-                const coincideTexto = !texto ||
-                    (est.apellidos_nombres && est.apellidos_nombres.toLowerCase().includes(texto)) ||
-                    (est.cedula_abanderado && est.cedula_abanderado.includes(texto)) ||
-                    (est.institucion && est.institucion.toLowerCase().includes(texto));
-
-                const coincideInst = !instNorm || est.institucion_normalizada === instNorm;
-
-                const coincideEstado = estado === 'todos' ||
-                    (estado === 'asistentes' && est.asistio) ||
-                    (estado === 'pendientes' && !est.asistio);
-
-                return coincideTexto && coincideInst && coincideEstado;
-            });
-
-            renderizarLista();
-        }
-
-        function renderizarLista() {
-            const contenedor = document.getElementById('contenedor-registros');
-            const sinResultados = document.getElementById('sin-resultados');
-
-            if (estudiantesFiltrados.length === 0) {
-                contenedor.innerHTML = '';
-                sinResultados.classList.remove('hidden');
-                return;
-            }
-
-            sinResultados.classList.add('hidden');
-            contenedor.innerHTML = estudiantesFiltrados.map(est => {
-                const esAsistente = est.asistio === true;
-                const badgeDignidad = est.dignidad?.toLowerCase().includes('abanderado')
-                    ? 'bg-amber-100 text-amber-800 border-amber-200'
-                    : 'bg-blue-100 text-blue-800 border-blue-200';
-
-                return `
-                <div class="bg-white rounded-2xl p-4 shadow-sm border ${esAsistente ? 'border-emerald-300 bg-emerald-50/20' : 'border-slate-200'} hover:shadow-md transition flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div class="space-y-1.5 flex-grow">
-                        <div class="flex flex-wrap items-center gap-2">
-                            <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${badgeDignidad}">
-                                ${est.dignidad || 'Sin dignidad'}
-                            </span>
-                            ${esAsistente ? `
-                                <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
-                                    <i class="fa-solid fa-check-circle mr-1"></i>ASISTIÓ
-                                </span>
-                            ` : ''}
-                        </div>
-
-                        <h3 class="text-base font-bold text-slate-900">${est.apellidos_nombres}</h3>
-                        
-                        <p class="text-xs font-medium text-slate-600">
-                            <i class="fa-solid fa-school text-slate-400 mr-1.5"></i>${est.institucion || ''}
-                        </p>
-
-                        ${esAsistente ? `
-                            <div class="pt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-700 bg-white/80 p-2 rounded-xl border border-emerald-100">
-                                <span><strong class="text-slate-500">Cédula:</strong> ${est.cedula_abanderado || '-'}</span>
-                                <span><strong class="text-slate-500">Tel:</strong> ${est.telefono_abanderado || '-'}</span>
-                                <span><strong class="text-slate-500">Correo:</strong> ${est.correo_abanderado || '-'}</span>
-                            </div>
-                        ` : ''}
-                    </div>
-
-                    <div class="flex items-center justify-end shrink-0">
-                        ${esAsistente ? `
-                            <button onclick="abrirModal(${est.id})" 
-                                class="w-full md:w-auto px-4 py-2.5 rounded-xl text-sm font-semibold bg-white border border-emerald-500 text-emerald-700 hover:bg-emerald-50 transition flex items-center justify-center gap-2">
-                                <i class="fa-solid fa-pen-to-square"></i>
-                                <span>Editar Datos</span>
-                            </button>
-                        ` : `
-                            <button onclick="abrirModal(${est.id})" 
-                                class="w-full md:w-auto px-5 py-2.5 rounded-xl text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition flex items-center justify-center gap-2">
-                                <i class="fa-solid fa-clipboard-check"></i>
-                                <span>Tomar Asistencia</span>
-                            </button>
-                        `}
-                    </div>
-                </div>
-                `;
-            }).join('');
-        }
-
-        function abrirModal(id) {
-            const est = todosLosEstudiantes.find(e => e.id === id);
-            if (!est) return;
-
-            document.getElementById('modal-id').value = est.id;
-            document.getElementById('modal-dignidad').textContent = est.dignidad || '';
-            document.getElementById('modal-nombre').textContent = est.apellidos_nombres;
-            document.getElementById('modal-institucion').textContent = est.institucion || '';
-
-            document.getElementById('input-cedula').value = est.cedula_abanderado || '';
-            document.getElementById('input-telefono').value = est.telefono_abanderado || '';
-            document.getElementById('input-correo').value = est.correo_abanderado || '';
-
-            const btnAnular = document.getElementById('btn-anular');
-            if (est.asistio) {
-                btnAnular.classList.remove('hidden');
-            } else {
-                btnAnular.classList.add('hidden');
-            }
-
-            document.getElementById('modal-asistencia').classList.remove('hidden');
-        }
-
-        function cerrarModal() {
-            document.getElementById('modal-asistencia').classList.add('hidden');
-        }
-
-        async function guardarAsistencia(e) {
-            e.preventDefault();
-            const id = parseInt(document.getElementById('modal-id').value);
-            const cedula = document.getElementById('input-cedula').value.trim();
-            const telefono = document.getElementById('input-telefono').value.trim();
-            const correo = document.getElementById('input-correo').value.trim().toLowerCase();
-
-            const btnGuardar = document.getElementById('btn-guardar');
-            btnGuardar.disabled = true;
-            btnGuardar.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
-
-            try {
-                const payload = {
-                    cedula_abanderado: cedula,
-                    telefono_abanderado: telefono,
-                    correo_abanderado: correo,
-                    asistio: true,
-                    fecha_asistencia: new Date().toISOString()
-                };
-
-                const { error } = await supabaseClient
-                    .from(TABLA)
-                    .update(payload)
-                    .eq('id', id);
-
-                if (error) throw error;
-
-                const index = todosLosEstudiantes.findIndex(item => item.id === id);
-                if (index !== -1) {
-                    todosLosEstudiantes[index] = { ...todosLosEstudiantes[index], ...payload };
-                }
-
-                actualizarEstadisticas();
-                filtrarRegistros();
-                cerrarModal();
-                mostrarToast('Asistencia y datos guardados en Supabase', 'success');
-            } catch (err) {
-                mostrarToast('Error al guardar en Supabase: ' + err.message, 'error');
-            } finally {
-                btnGuardar.disabled = false;
-                btnGuardar.innerHTML = '<i class="fa-solid fa-check"></i> <span>Confirmar Asistencia</span>';
-            }
-        }
-
-        function abrirModalAnular() {
-            document.getElementById('modal-confirmar-anulacion').classList.remove('hidden');
-        }
-
-        function cerrarModalAnular() {
-            document.getElementById('modal-confirmar-anulacion').classList.add('hidden');
-        }
-
-        async function ejecutarAnulacionAsistencia() {
-            const id = parseInt(document.getElementById('modal-id').value);
-            cerrarModalAnular();
-
-            try {
-                const payload = {
-                    asistio: false,
-                    fecha_asistencia: null
-                };
-
-                const { error } = await supabaseClient
-                    .from(TABLA)
-                    .update(payload)
-                    .eq('id', id);
-
-                if (error) throw error;
-
-                const index = todosLosEstudiantes.findIndex(item => item.id === id);
-                if (index !== -1) {
-                    todosLosEstudiantes[index] = { ...todosLosEstudiantes[index], ...payload };
-                }
-
-                actualizarEstadisticas();
-                filtrarRegistros();
-                cerrarModal();
-                mostrarToast('Marca de asistencia quitada', 'success');
-            } catch (err) {
-                mostrarToast('Error al actualizar: ' + err.message, 'error');
-            }
-        }
-
-        // ==========================================
-        // FUNCIONES DE CRONOGRAMA Y CALENDARIO DE VISITAS
-        // ==========================================
-        function cambiarModoCronograma(modo) {
-            modoCronograma = modo;
-            const btnCal = document.getElementById('btn-modo-calendario');
-            const btnLis = document.getElementById('btn-modo-lista');
-            const subCal = document.getElementById('subvista-calendario');
-            const subLis = document.getElementById('subvista-lista');
-
-            if (modo === 'calendario') {
-                subCal.classList.remove('hidden');
-                subLis.classList.add('hidden');
-                btnCal.className = 'flex-1 lg:flex-none px-4 py-2 rounded-lg text-xs font-bold bg-white text-blue-700 shadow-sm transition flex items-center justify-center gap-2';
-                btnLis.className = 'flex-1 lg:flex-none px-4 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition flex items-center justify-center gap-2';
-            } else {
-                subCal.classList.add('hidden');
-                subLis.classList.remove('hidden');
-                btnLis.className = 'flex-1 lg:flex-none px-4 py-2 rounded-lg text-xs font-bold bg-white text-blue-700 shadow-sm transition flex items-center justify-center gap-2';
-                btnCal.className = 'flex-1 lg:flex-none px-4 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition flex items-center justify-center gap-2';
-            }
-            renderizarCronograma();
-        }
-
-        function cambiarMesCalendario(delta) {
-            fechaActualCalendario = new Date(
-                fechaActualCalendario.getFullYear(),
-                fechaActualCalendario.getMonth() + delta,
-                1
-            );
-            renderizarCalendario();
-        }
-
-        function irAHoyCalendario() {
-            const hoy = new Date();
-            fechaActualCalendario = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
-            diaSeleccionadoStr = hoy.toISOString().slice(0, 10);
-            renderizarCalendario();
-        }
-
-        function seleccionarDiaCalendario(fechaStr) {
-            diaSeleccionadoStr = fechaStr;
-            renderizarCalendario();
-        }
-
-        function abrirModalVisita() {
-            resetearFormVisita();
-            document.getElementById('visita-fecha').value = diaSeleccionadoStr || new Date().toISOString().slice(0, 10);
-            document.getElementById('modal-visita').classList.remove('hidden');
-        }
-
-        function abrirModalVisitaConFecha() {
-            abrirModalVisita();
-        }
-
-        function cerrarModalVisita() {
-            document.getElementById('modal-visita').classList.add('hidden');
-            resetearFormVisita();
-        }
-
-        async function cargarVisitas() {
-            try {
-                const { data, error } = await supabaseClient
-                    .from(TABLA_VISITAS)
-                    .select('*')
-                    .order('fecha_visita', { ascending: true })
-                    .order('hora_visita', { ascending: true });
-
-                if (error) {
-                    console.warn('Tabla cronograma_visitas aún no creada:', error.message);
-                    return;
-                }
-
-                todasLasVisitas = data || [];
-                actualizarEstadisticasVisitas();
-                renderizarCronograma();
-            } catch (err) {
-                console.error('Error cargando cronograma:', err);
-            }
-        }
-
-        function actualizarEstadisticasVisitas() {
-            const total = todasLasVisitas.length;
-            const realizadas = todasLasVisitas.filter(v => v.estado === 'Realizada').length;
-            const programadas = total - realizadas;
-
-            document.getElementById('badge-visitas').textContent = total;
-            document.getElementById('visita-stat-total').textContent = total;
-            document.getElementById('visita-stat-programadas').textContent = programadas;
-            document.getElementById('visita-stat-realizadas').textContent = realizadas;
-        }
-
-        async function guardarVisita(e) {
-            e.preventDefault();
-            const idEdicion = document.getElementById('visita-id').value;
-            const institucion = document.getElementById('visita-colegio').value.trim();
-            const fecha_visita = document.getElementById('visita-fecha').value;
-            const hora_visita = document.getElementById('visita-hora').value;
-            const descripcion = document.getElementById('visita-descripcion').value.trim();
-
-            if (!institucion || !fecha_visita || !hora_visita || !descripcion) return;
-
-            const btn = document.getElementById('btn-guardar-visita');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
-
-            try {
-                const payload = {
-                    institucion,
-                    institucion_normalizada: normalizarInstitucion(institucion),
-                    fecha_visita,
-                    hora_visita,
-                    descripcion
-                };
-
-                if (idEdicion) {
-                    const { error } = await supabaseClient
-                        .from(TABLA_VISITAS)
-                        .update(payload)
-                        .eq('id', parseInt(idEdicion));
-                    if (error) throw error;
-                    mostrarToast('Visita actualizada correctamente', 'success');
-                } else {
-                    payload.estado = 'Programada';
-                    const { error } = await supabaseClient
-                        .from(TABLA_VISITAS)
-                        .insert([payload]);
-                    if (error) throw error;
-                    mostrarToast('Visita agendada en el calendario', 'success');
-                }
-
-                // Enfocar el calendario en la fecha guardada
-                diaSeleccionadoStr = fecha_visita;
-                const [anio, mes] = fecha_visita.split('-');
-                fechaActualCalendario = new Date(parseInt(anio, 10), parseInt(mes, 10) - 1, 1);
-
-                cerrarModalVisita();
-                await cargarVisitas();
-            } catch (err) {
-                mostrarToast('Error: Ejecuta primero el SQL de cronograma_visitas en Supabase (' + err.message + ')', 'error');
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-check"></i> <span>Guardar Visita</span>';
-            }
-        }
-
-        function editarVisita(id) {
-            const visita = todasLasVisitas.find(v => v.id === id);
-            if (!visita) return;
-
-            document.getElementById('visita-id').value = visita.id;
-            document.getElementById('visita-colegio').value = visita.institucion;
-            document.getElementById('visita-fecha').value = visita.fecha_visita;
-            document.getElementById('visita-hora').value = visita.hora_visita.slice(0, 5);
-            document.getElementById('visita-descripcion').value = visita.descripcion;
-
-            document.getElementById('titulo-modal-visita').textContent = 'Editar Visita Programada';
-            document.getElementById('icono-modal-visita').className = 'fa-solid fa-pen-to-square';
-            document.getElementById('btn-guardar-visita').innerHTML = '<i class="fa-solid fa-save"></i> <span>Guardar Cambios</span>';
-
-            document.getElementById('modal-visita').classList.remove('hidden');
-        }
-
-        function resetearFormVisita() {
-            document.getElementById('form-visita').reset();
-            document.getElementById('visita-id').value = '';
-            document.getElementById('titulo-modal-visita').textContent = 'Agendar Nueva Visita';
-            document.getElementById('icono-modal-visita').className = 'fa-solid fa-calendar-plus';
-            document.getElementById('btn-guardar-visita').innerHTML = '<i class="fa-solid fa-check"></i> <span>Guardar Visita</span>';
-        }
-
-        async function alternarEstadoVisita(id) {
-            const visita = todasLasVisitas.find(v => v.id === id);
-            if (!visita) return;
-
-            const nuevoEstado = visita.estado === 'Realizada' ? 'Programada' : 'Realizada';
-
-            try {
-                const { error } = await supabaseClient
-                    .from(TABLA_VISITAS)
-                    .update({ estado: nuevoEstado })
-                    .eq('id', id);
-
-                if (error) throw error;
-
-                visita.estado = nuevoEstado;
-                actualizarEstadisticasVisitas();
-                renderizarCronograma();
-                mostrarToast(`Visita marcada como ${nuevoEstado}`, 'success');
-            } catch (err) {
-                mostrarToast('Error al cambiar estado: ' + err.message, 'error');
-            }
-        }
-
-        function abrirModalEliminarVisita(id) {
-            document.getElementById('eliminar-visita-id').value = id;
-            document.getElementById('modal-eliminar-visita').classList.remove('hidden');
-        }
-
-        function cerrarModalEliminarVisita() {
-            document.getElementById('modal-eliminar-visita').classList.add('hidden');
-        }
-
-        async function ejecutarEliminacionVisita() {
-            const id = parseInt(document.getElementById('eliminar-visita-id').value);
-            cerrarModalEliminarVisita();
-
-            try {
-                const { error } = await supabaseClient
-                    .from(TABLA_VISITAS)
-                    .delete()
-                    .eq('id', id);
-
-                if (error) throw error;
-
-                todasLasVisitas = todasLasVisitas.filter(v => v.id !== id);
-                actualizarEstadisticasVisitas();
-                renderizarCronograma();
-                mostrarToast('Visita eliminada del cronograma', 'success');
-            } catch (err) {
-                mostrarToast('Error al eliminar: ' + err.message, 'error');
-            }
-        }
-
-        function formatearFechaLegible(fechaStr) {
-            if (!fechaStr) return '';
-            const [anio, mes, dia] = fechaStr.split('-');
-            const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-            return `${dia} ${meses[parseInt(mes, 10) - 1]} ${anio}`;
-        }
-
-        function obtenerVisitasFiltradas() {
-            const texto = document.getElementById('busqueda-visitas').value.toLowerCase().trim();
-            const filtroEstado = document.getElementById('filtro-estado-visita').value;
-
-            return todasLasVisitas.filter(v => {
-                const coincideTexto = !texto ||
-                    v.institucion.toLowerCase().includes(texto) ||
-                    v.descripcion.toLowerCase().includes(texto);
-                const coincideEstado = filtroEstado === 'todas' || v.estado === filtroEstado;
-                return coincideTexto && coincideEstado;
-            });
-        }
-
-        function construirTarjetaVisita(v) {
-            const realizada = v.estado === 'Realizada';
-            const horaCorta = v.hora_visita ? v.hora_visita.slice(0, 5) : '';
-
-            return `
-            <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border ${realizada ? 'border-emerald-300 bg-emerald-50/20' : 'border-slate-200'} hover:shadow-md transition flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                <div class="flex items-start gap-4">
-                    <div class="shrink-0 w-24 text-center p-2.5 rounded-xl border ${realizada ? 'bg-emerald-100/70 border-emerald-200 text-emerald-900' : 'bg-blue-50 border-blue-200 text-blue-900'}">
-                        <p class="text-xs font-extrabold uppercase">${formatearFechaLegible(v.fecha_visita)}</p>
-                        <p class="text-sm font-bold mt-1 flex items-center justify-center gap-1">
-                            <i class="fa-regular fa-clock text-xs"></i> ${horaCorta}
-                        </p>
-                    </div>
-
-                    <div class="space-y-1.5">
-                        <div class="flex flex-wrap items-center gap-2">
-                            <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${realizada ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-amber-100 text-amber-800 border-amber-200'}">
-                                <i class="fa-solid ${realizada ? 'fa-check-double' : 'fa-calendar-day'} mr-1"></i>${v.estado.toUpperCase()}
-                            </span>
-                        </div>
-                        <h4 class="text-base font-bold text-slate-900">${v.institucion}</h4>
-                        <p class="text-sm text-slate-600 leading-relaxed">${v.descripcion}</p>
-                    </div>
-                </div>
-
-                <div class="flex flex-wrap items-center justify-end gap-2 pt-3 lg:pt-0 border-t lg:border-t-0 border-slate-100 shrink-0">
-                    <button onclick="alternarEstadoVisita(${v.id})" 
-                        class="px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${realizada ? 'bg-amber-100 text-amber-800 hover:bg-amber-200' : 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm'}">
-                        <i class="fa-solid ${realizada ? 'fa-rotate-left' : 'fa-check'}"></i>
-                        <span>${realizada ? 'Marcar Pendiente' : 'Marcar Realizada'}</span>
-                    </button>
-
-                    <button onclick="editarVisita(${v.id})" 
-                        class="px-3 py-2 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition flex items-center gap-1.5" title="Editar visita">
-                        <i class="fa-solid fa-pen"></i>
-                        <span>Editar</span>
-                    </button>
-
-                    <button onclick="abrirModalEliminarVisita(${v.id})" 
-                        class="px-3 py-2 rounded-xl text-xs font-semibold bg-red-50 text-red-600 hover:bg-red-100 transition flex items-center gap-1.5" title="Eliminar visita">
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
-                </div>
-            </div>
-            `;
-        }
-
-        function renderizarCalendario() {
-            const filtradas = obtenerVisitasFiltradas();
-            const anio = fechaActualCalendario.getFullYear();
-            const mes = fechaActualCalendario.getMonth();
-
-            const nombresMeses = [
-                'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-                'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
-            ];
-            document.getElementById('calendario-mes-titulo').textContent = `${nombresMeses[mes]} ${anio}`;
-
-            const primerDiaSemana = new Date(anio, mes, 1).getDay();
-            const totalDiasMes = new Date(anio, mes + 1, 0).getDate();
-            const hoyStr = new Date().toISOString().slice(0, 10);
-
-            const grid = document.getElementById('calendario-grid');
-            let celdasHTML = '';
-
-            // Celdas vacías antes del día 1
-            for (let i = 0; i < primerDiaSemana; i++) {
-                celdasHTML += `<div class="bg-slate-50/70 min-h-[78px] sm:min-h-[105px] p-1.5"></div>`;
-            }
-
-            // Días del mes
-            for (let dia = 1; dia <= totalDiasMes; dia++) {
-                const mesPadded = String(mes + 1).padStart(2, '0');
-                const diaPadded = String(dia).padStart(2, '0');
-                const fechaCell = `${anio}-${mesPadded}-${diaPadded}`;
-
-                const visitasDia = filtradas.filter(v => v.fecha_visita === fechaCell);
-                const esHoy = fechaCell === hoyStr;
-                const esSeleccionado = fechaCell === diaSeleccionadoStr;
-
-                const badgesEventos = visitasDia.slice(0, 2).map(v => {
-                    const colorChip = v.estado === 'Realizada'
-                        ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
-                        : 'bg-blue-100 text-blue-800 border-blue-200';
-                    const horaShort = v.hora_visita ? v.hora_visita.slice(0, 5) : '';
-                    return `
-                        <div class="text-[10px] leading-tight px-1.5 py-0.5 rounded border truncate font-medium ${colorChip}" title="${horaShort} - ${v.institucion}">
-                            <span class="font-bold">${horaShort}</span> ${v.institucion}
-                        </div>
-                    `;
-                }).join('');
-
-                const extraBadge = visitasDia.length > 2
-                    ? `<div class="text-[10px] font-bold text-slate-500 pl-1">+${visitasDia.length - 2} más</div>`
-                    : '';
-
-                celdasHTML += `
-                    <div onclick="seleccionarDiaCalendario('${fechaCell}')" 
-                        class="min-h-[78px] sm:min-h-[105px] p-1.5 sm:p-2 cursor-pointer transition flex flex-col justify-between ${esSeleccionado ? 'bg-blue-50/90 ring-2 ring-inset ring-blue-600' : 'bg-white hover:bg-slate-50'}">
-                        <div class="flex items-center justify-between">
-                            <span class="w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-xs sm:text-sm font-bold ${esHoy ? 'bg-blue-600 text-white shadow-sm' : (esSeleccionado ? 'text-blue-700' : 'text-slate-700')}">
-                                ${dia}
-                            </span>
-                            ${visitasDia.length > 0 ? `<span class="sm:hidden w-2 h-2 rounded-full bg-blue-600"></span>` : ''}
-                        </div>
-                        <div class="hidden sm:block space-y-1 mt-1">
-                            ${badgesEventos}
-                            ${extraBadge}
-                        </div>
-                        ${visitasDia.length > 0 ? `<div class="sm:hidden text-[10px] font-bold text-blue-700 text-center mt-1">${visitasDia.length} vis.</div>` : ''}
-                    </div>
-                `;
-            }
-
-            grid.innerHTML = celdasHTML;
-
-            // Renderizar detalle del día seleccionado debajo del calendario
-            document.getElementById('titulo-dia-seleccionado').textContent = `Visitas del ${formatearFechaLegible(diaSeleccionadoStr)}`;
-            const visitasDelDiaSeleccionado = filtradas.filter(v => v.fecha_visita === diaSeleccionadoStr);
-            const listaDiaContenedor = document.getElementById('lista-visitas-dia');
-
-            if (visitasDelDiaSeleccionado.length === 0) {
-                listaDiaContenedor.innerHTML = `
-                    <div class="bg-white rounded-xl p-6 text-center border border-dashed border-slate-300 text-slate-500 text-sm">
-                        No hay visitas agendadas para esta fecha.
-                    </div>
-                `;
-            } else {
-                listaDiaContenedor.innerHTML = visitasDelDiaSeleccionado.map(v => construirTarjetaVisita(v)).join('');
-            }
-        }
-
-        function renderizarCronograma() {
-            if (modoCronograma === 'calendario') {
-                renderizarCalendario();
-                return;
-            }
-
-            const contenedor = document.getElementById('contenedor-visitas');
-            const sinVisitas = document.getElementById('sin-visitas');
-            const filtradas = obtenerVisitasFiltradas();
-
-            if (filtradas.length === 0) {
-                contenedor.innerHTML = '';
-                sinVisitas.classList.remove('hidden');
-                return;
-            }
-
-            sinVisitas.classList.add('hidden');
-            contenedor.innerHTML = filtradas.map(v => construirTarjetaVisita(v)).join('');
-        }
-
-        // Exportar ÚNICAMENTE el reporte en Excel de las visitas agendadas
-        function exportarExcelVisitas() {
-            if (todasLasVisitas.length === 0) {
-                mostrarToast('No hay visitas registradas para exportar', 'error');
-                return;
-            }
-
-            const wb = XLSX.utils.book_new();
-
-            const datosVisitas = todasLasVisitas.map((v, idx) => ({
-                'N°': idx + 1,
-                'Fecha': v.fecha_visita || '',
-                'Hora': v.hora_visita ? v.hora_visita.slice(0, 5) : '',
-                'Unidad Educativa': v.institucion || '',
-                'Descripción / Motivo': v.descripcion || '',
-                'Estado': v.estado || 'Programada'
-            }));
-
-            const wsVisitas = XLSX.utils.json_to_sheet(datosVisitas);
-            wsVisitas['!cols'] = [
-                { wch: 5 }, { wch: 14 }, { wch: 10 }, { wch: 48 }, { wch: 55 }, { wch: 16 }
-            ];
-            XLSX.utils.book_append_sheet(wb, wsVisitas, 'Cronograma de Visitas');
-
-            const fechaHoy = new Date().toISOString().slice(0, 10);
-            XLSX.writeFile(wb, `Cronograma_Visitas_Colegios_Manta_${fechaHoy}.xlsx`);
-            mostrarToast('Reporte Excel de visitas descargado', 'success');
-        }
-
-        // Exportar informe completo en Excel (.xlsx) incluyendo hoja de Cronograma
-        function exportarExcel() {
-            if (todosLosEstudiantes.length === 0) {
-                mostrarToast('No hay datos para exportar', 'error');
-                return;
-            }
-
-            const wb = XLSX.utils.book_new();
-
-            // 1. HOJA 1: BASE GENERAL CONSOLIDADA
-            const datosGenerales = todosLosEstudiantes.map((e, idx) => ({
-                'N°': idx + 1,
-                'Centro': e.centro || 'Manta',
-                'Unidad Educativa': (e.institucion || '').toUpperCase().replace(/\.+$/, '').trim(),
-                'Apellidos y Nombres': e.apellidos_nombres || '',
-                'Dignidad': e.dignidad || '',
-                'Estado Asistencia': e.asistio ? 'ASISTIÓ' : 'PENDIENTE',
-                'Cédula': e.cedula_abanderado || '',
-                'Teléfono / WhatsApp': e.telefono_abanderado || '',
-                'Correo Electrónico': e.correo_abanderado || '',
-                'Fecha y Hora de Registro': e.fecha_asistencia ? new Date(e.fecha_asistencia).toLocaleString('es-EC') : ''
-            }));
-
-            const wsGeneral = XLSX.utils.json_to_sheet(datosGenerales);
-            wsGeneral['!cols'] = [
-                { wch: 5 }, { wch: 10 }, { wch: 48 }, { wch: 38 }, { wch: 32 },
-                { wch: 16 }, { wch: 14 }, { wch: 16 }, { wch: 32 }, { wch: 22 }
-            ];
-            XLSX.utils.book_append_sheet(wb, wsGeneral, 'Base General');
-
-            // 2. HOJA 2: SOLO ASISTENTES CONFIRMADOS
-            const asistentes = todosLosEstudiantes.filter(e => e.asistio);
-            const datosAsistentes = asistentes.map((e, idx) => ({
-                'N°': idx + 1,
-                'Apellidos y Nombres': e.apellidos_nombres || '',
-                'Cédula': e.cedula_abanderado || '',
-                'Teléfono / WhatsApp': e.telefono_abanderado || '',
-                'Correo Electrónico': e.correo_abanderado || '',
-                'Dignidad': e.dignidad || '',
-                'Unidad Educativa': (e.institucion || '').toUpperCase().replace(/\.+$/, '').trim(),
-                'Fecha y Hora de Registro': e.fecha_asistencia ? new Date(e.fecha_asistencia).toLocaleString('es-EC') : ''
-            }));
-
-            const wsAsistentes = XLSX.utils.json_to_sheet(
-                datosAsistentes.length > 0 ? datosAsistentes : [{ 'Mensaje': 'Aún no hay asistentes registrados' }]
-            );
-            wsAsistentes['!cols'] = [
-                { wch: 5 }, { wch: 38 }, { wch: 14 }, { wch: 16 }, { wch: 32 },
-                { wch: 32 }, { wch: 48 }, { wch: 22 }
-            ];
-            XLSX.utils.book_append_sheet(wb, wsAsistentes, 'Asistentes Confirmados');
-
-            // 3. HOJA 3: RESUMEN POR UNIDAD EDUCATIVA
-            const resumenMap = new Map();
-            todosLosEstudiantes.forEach(e => {
-                const clave = e.institucion_normalizada;
-                if (!resumenMap.has(clave)) {
-                    resumenMap.set(clave, {
-                        nombre: (e.institucion || '').toUpperCase().replace(/\.+$/, '').trim(),
-                        total: 0,
-                        asistieron: 0
+            function crearCopos() {
+                const cantidad = Math.min(150, Math.floor((width * height) / 9800));
+                copos = [];
+                for (let i = 0; i < cantidad; i++) {
+                    const tipo = Math.random();
+                    copos.push({
+                        x: Math.random() * width,
+                        y: Math.random() * height,
+                        r: tipo < 0.16 ? Math.random() * 4.5 + 3.5 : Math.random() * 2.8 + 1.1,
+                        vy: Math.random() * 1.15 + 0.4,
+                        vx: (Math.random() - 0.5) * 0.45,
+                        fase: Math.random() * Math.PI * 2,
+                        velFase: Math.random() * 0.02 + 0.008,
+                        rot: Math.random() * Math.PI,
+                        velRot: (Math.random() - 0.5) * 0.02,
+                        opacidad: Math.random() * 0.68 + 0.25,
+                        esCristal: tipo < 0.16,
+                        esDorado: tipo >= 0.16 && tipo < 0.34
                     });
                 }
-                const item = resumenMap.get(clave);
-                item.total += 1;
-                if (e.asistio) item.asistieron += 1;
-            });
-
-            const datosResumen = Array.from(resumenMap.values())
-                .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'))
-                .map((item, idx) => ({
-                    'N°': idx + 1,
-                    'Unidad Educativa': item.nombre,
-                    'Total Convocados': item.total,
-                    'Asistentes': item.asistieron,
-                    'Pendientes': item.total - item.asistieron,
-                    '% Asistencia': item.total > 0 ? Math.round((item.asistieron / item.total) * 100) + '%' : '0%'
-                }));
-
-            // Fila de Totales al final del resumen
-            const totalConvocados = todosLosEstudiantes.length;
-            const totalAsistieron = asistentes.length;
-            datosResumen.push({
-                'N°': '',
-                'Unidad Educativa': 'TOTAL GENERAL',
-                'Total Convocados': totalConvocados,
-                'Asistentes': totalAsistieron,
-                'Pendientes': totalConvocados - totalAsistieron,
-                '% Asistencia': totalConvocados > 0 ? Math.round((totalAsistieron / totalConvocados) * 100) + '%' : '0%'
-            });
-
-            const wsResumen = XLSX.utils.json_to_sheet(datosResumen);
-            wsResumen['!cols'] = [
-                { wch: 5 }, { wch: 52 }, { wch: 18 }, { wch: 14 }, { wch: 14 }, { wch: 15 }
-            ];
-            XLSX.utils.book_append_sheet(wb, wsResumen, 'Resumen por Colegio');
-
-            // 4. HOJA 4: CRONOGRAMA DE VISITAS A COLEGIOS
-            const datosVisitas = todasLasVisitas.map((v, idx) => ({
-                'N°': idx + 1,
-                'Fecha': v.fecha_visita || '',
-                'Hora': v.hora_visita ? v.hora_visita.slice(0, 5) : '',
-                'Unidad Educativa': v.institucion || '',
-                'Descripción / Motivo': v.descripcion || '',
-                'Estado': v.estado || 'Programada'
-            }));
-
-            const wsVisitas = XLSX.utils.json_to_sheet(
-                datosVisitas.length > 0 ? datosVisitas : [{ 'Mensaje': 'No hay visitas agendadas en el cronograma' }]
-            );
-            wsVisitas['!cols'] = [
-                { wch: 5 }, { wch: 14 }, { wch: 10 }, { wch: 48 }, { wch: 55 }, { wch: 16 }
-            ];
-            XLSX.utils.book_append_sheet(wb, wsVisitas, 'Cronograma Visitas');
-
-            // Generar nombre de archivo con fecha actual
-            const fechaHoy = new Date().toISOString().slice(0, 10);
-            XLSX.writeFile(wb, `Informe_Asistencia_y_Visitas_Manta_${fechaHoy}.xlsx`);
-            mostrarToast('Informe Excel completo descargado', 'success');
-        }
-
-        // Notificación Toast visual
-        function mostrarToast(mensaje, tipo = 'success') {
-            const toast = document.getElementById('toast');
-            const icon = document.getElementById('toast-icon');
-            document.getElementById('toast-msg').textContent = mensaje;
-
-            if (tipo === 'error') {
-                icon.className = 'fa-solid fa-circle-xmark text-red-400 text-lg';
-            } else {
-                icon.className = 'fa-solid fa-circle-check text-emerald-400 text-lg';
             }
 
-            toast.classList.remove('translate-y-20', 'opacity-0');
-            setTimeout(() => {
-                toast.classList.add('translate-y-20', 'opacity-0');
-            }, 3500);
+            function animar() {
+                ctx.clearRect(0, 0, width, height);
+
+                for (let i = 0; i < copos.length; i++) {
+                    const c = copos[i];
+                    c.fase += c.velFase;
+                    c.rot += c.velRot;
+                    c.y += c.vy;
+                    c.x += c.vx + Math.sin(c.fase) * 0.45;
+
+                    if (c.y > height + 10) {
+                        c.y = -10;
+                        c.x = Math.random() * width;
+                    }
+                    if (c.x > width + 10) c.x = -10;
+                    if (c.x < -10) c.x = width + 10;
+
+                    if (c.esCristal) {
+                        dibujarCristal(c.x, c.y, c.r, c.rot, c.opacidad);
+                    } else {
+                        ctx.beginPath();
+                        ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2);
+                        if (c.esDorado) {
+                            ctx.fillStyle = `rgba(233, 201, 130, ${c.opacidad})`;
+                            ctx.shadowColor = 'rgba(233, 201, 130, 0.9)';
+                            ctx.shadowBlur = 7;
+                        } else {
+                            ctx.fillStyle = `rgba(255, 255, 255, ${c.opacidad})`;
+                            ctx.shadowColor = 'rgba(186, 230, 253, 0.5)';
+                            ctx.shadowBlur = 4;
+                        }
+                        ctx.fill();
+                        ctx.shadowBlur = 0;
+                    }
+                }
+                requestAnimationFrame(animar);
+            }
+
+            redimensionar();
+            crearCopos();
+            animar();
+
+            window.addEventListener('resize', () => {
+                redimensionar();
+                crearCopos();
+            });
         }
+
+        // 2. ENLACES DE CALENDARIO
+        function configurarEnlaces() {
+            const titulo = encodeURIComponent('Save the Date: Fiesta de Navidad UTPL');
+            const ubicacion = encodeURIComponent('Santo Domingo, Ecuador');
+            const detalle = encodeURIComponent(
+                'Fiesta de Navidad UTPL en Santo Domingo (20:00).'
+            );
+
+            document.getElementById('link-google-cal').href =
+                `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${titulo}&dates=20261212T010000Z/20261212T050000Z&details=${detalle}&location=${ubicacion}`;
+
+            document.getElementById('link-outlook-web').href =
+                `https://outlook.office.com/calendar/0/deeplink/compose?subject=${titulo}&startdt=2026-12-11T20:00:00&enddt=2026-12-11T23:59:00&body=${detalle}&location=${ubicacion}`;
+        }
+
+        // 3. ARCHIVO UNIVERSAL .ICS
+        function descargarICS(etiqueta) {
+            const ics = [
+                'BEGIN:VCALENDAR',
+                'VERSION:2.0',
+                'CALSCALE:GREGORIAN',
+                'METHOD:PUBLISH',
+                'PRODID:-//UTPL//Fiesta de Navidad//ES',
+                'BEGIN:VEVENT',
+                'UID:utpl-navidad-2026@utpl.edu.ec',
+                'DTSTAMP:20261124T160000Z',
+                'DTSTART:20261212T010000Z',
+                'DTEND:20261212T050000Z',
+                'SUMMARY:Save the Date: Fiesta de Navidad UTPL',
+                'LOCATION:Santo Domingo, Ecuador',
+                'DESCRIPTION:Fiesta de Navidad UTPL en Santo Domingo (20:00).',
+                'STATUS:CONFIRMED',
+                'BEGIN:VALARM',
+                'TRIGGER:-P2D',
+                'ACTION:DISPLAY',
+                'DESCRIPTION:Recordatorio: Fiesta de Navidad UTPL en Santo Domingo (20:00)',
+                'END:VALARM',
+                'END:VEVENT',
+                'END:VCALENDAR'
+            ].join('\r\n');
+
+            const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'Save-The-Date-Fiesta-Navidad-UTPL.ics';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            cerrarModalCalendario();
+            mostrarAviso(`Listo para ${etiqueta}`);
+        }
+
+        function abrirModalCalendario() {
+            document.getElementById('calendar-modal').classList.add('active');
+        }
+
+        function cerrarModalCalendario() {
+            document.getElementById('calendar-modal').classList.remove('active');
+        }
+
+        function mostrarAviso(texto) {
+            const toast = document.getElementById('toast-msg');
+            document.getElementById('toast-text').textContent = texto;
+            toast.classList.add('visible');
+            setTimeout(() => toast.classList.remove('visible'), 3200);
+        }
+
+        // 4. CUENTA REGRESIVA AL VIERNES 11 DE DICIEMBRE 2026
+        function iniciarCuentaRegresiva() {
+            const meta = new Date('2026-12-11T20:00:00-05:00').getTime();
+
+            function tick() {
+                const diff = meta - Date.now();
+                if (diff <= 0) {
+                    ['cd-days', 'cd-hours', 'cd-mins', 'cd-secs'].forEach(id => {
+                        document.getElementById(id).textContent = '00';
+                    });
+                    return;
+                }
+                const d = Math.floor(diff / 86400000);
+                const h = Math.floor((diff % 86400000) / 3600000);
+                const m = Math.floor((diff % 3600000) / 60000);
+                const s = Math.floor((diff % 60000) / 1000);
+
+                document.getElementById('cd-days').textContent = String(d).padStart(2, '0');
+                document.getElementById('cd-hours').textContent = String(h).padStart(2, '0');
+                document.getElementById('cd-mins').textContent = String(m).padStart(2, '0');
+                document.getElementById('cd-secs').textContent = String(s).padStart(2, '0');
+            }
+
+            tick();
+            setInterval(tick, 1000);
+        }
+
+        window.addEventListener('load', () => {
+            iniciarNieve();
+            configurarEnlaces();
+            iniciarCuentaRegresiva();
+        });
     </script>
 </body>
 </html>
